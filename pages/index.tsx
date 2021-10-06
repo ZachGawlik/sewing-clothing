@@ -25,7 +25,7 @@ const Home: NextPage = () => {
         <p>
           For now, this site is
           </p>
-        <div>
+        <div className={styles.images}>
           <img src="/under-construction-2.gif" alt="" />{' '}
           <img src="/under-construction-1.gif" alt="Under construction" />{' '}
           <img src="/under-construction-2.gif" alt="" />
