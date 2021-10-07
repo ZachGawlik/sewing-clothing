@@ -7,28 +7,29 @@ import MetricApp from './MetricApp';
 
 const MetricPage: NextPage = () => {
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
-        <title>sewing tools</title>
+        <title>Metric Imperial Converter - Inches and Centimeters</title>
         <meta
           name="description"
           content="Sewing tools - Metric Imperial length converter"
         />
       </Head>
       <main className={styles.main}>
+        <div>
+          <Link href="/">sewing.clothing</Link>
+          <Link href="/tools">/tools</Link>/metric
+        </div>
         <h1
           css={css`
             color: #0070f3;
             line-height: 1.15;
-            font-size: 7vw;
+            font-size: 2em;
             text-align: center;
             font-family: Menlo, Monaco, 'Courier New', Courier, monospace;
           `}
         >
-          <Link href="/">sewing.clothing</Link>
-          <Link href="/tools">/tools</Link>
-          <br />
-          /metric
+          Metric Imperial length converter
         </h1>
         <MetricApp />
       </main>
