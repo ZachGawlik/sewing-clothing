@@ -12,11 +12,16 @@ function reduceFraction(numerator: number, denominator: number) {
 
 /*
 TODOS:
+ * Support cm input like "1.5"cm
  * Have 5/8s or 1/16s option
  * Commit history to localstorage
-
+  Inch -> cm input.
  * Mobile. How to deal with keyboard
- * Uhhhhhh yards to meters?
+ * Design. For all sizes.
+ * ? Table as second "page" with input page as 100vh?
+ * 		Or only displaying together for large-enough resolutions.. if I figure out design that isn't clunky
+ * Query params
+ * Uhhhhhh yards <-> meters?
 */
 
 const parseToCm = (strInput: string) => {
