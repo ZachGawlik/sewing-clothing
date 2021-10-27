@@ -12,6 +12,7 @@ function reduceFraction(numerator: number, denominator: number) {
 
 /*
 TODOS:
+ * Enable decimal
  * Support cm input like "1.5"cm
  * Have 5/8s or 1/16s option
  * Commit history to localstorage
@@ -105,7 +106,7 @@ const MetricApp = () => {
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       // Prevents clobbering keyboard shortcuts like cmd+c or hitting Tab
-      if (e.key.match(/\d/)) {
+      if (e.key.match(/(\d\.)/)) {
         textInput.current?.focus();
       }
     };
@@ -141,14 +142,14 @@ const MetricApp = () => {
   /* TODO: I should remove inputMode when inputting imperial */
   return (
     <div>
-      <p>Metric App</p>
-      <form>
+      <form autoComplete="off">
         <div>
+          {/* text-lg is necessary to prevent ios zooming on focus */}
           <input
+            className="border-4 border-purple-100 border-style-solid text-lg container bg-transparent"
             type="text"
             inputMode="decimal"
             autoComplete="off"
-            className="border-4 h-10 text-lg"
             autoFocus={true}
             ref={textInput}
             onChange={(e) => {
@@ -159,15 +160,22 @@ const MetricApp = () => {
           />
         </div>
       </form>
-      <p>{latestInput}cm</p>
-      <p>
-        Converted:{' '}
-        {latestInput !== 'NaN' &&
-          inchDecimalToHuman(
-            cmToInchDecimal(parseFloat(latestInput)),
-            inchResultFormat
-          )}
-      </p>
+      <div className="flex font-mono mb-8">
+        <p className="flex-1">
+          <span className="text-xl text-pink-300">{latestInput}</span>
+          cm
+        </p>
+        <p className="flex-1">
+          <span className="text-xl text-blue-300">
+            {latestInput !== 'NaN' &&
+              inchDecimalToHuman(
+                cmToInchDecimal(parseFloat(latestInput)),
+                inchResultFormat
+              )}
+          </span>
+          in
+        </p>
+      </div>
       <InputTable cmValues={CM_TABLE} inchResultFormat={inchResultFormat} />
       <h3>History</h3>
       <InputTable

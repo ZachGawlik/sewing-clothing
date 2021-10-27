@@ -13,7 +13,7 @@ const MetricPage: NextPage = () => {
           content="Sewing tools - Metric Imperial length converter"
         />
       </Head>
-      <main>
+      <main className="bg-gray-900 text-white min-h-screen">
         <div className="mb-8 px-12">
           <div>
             <Link href="/">
