@@ -148,7 +148,7 @@ const MetricApp = () => {
             type="text"
             inputMode="decimal"
             autoComplete="off"
-            className="border-4"
+            className="border-4 h-10 text-lg"
             autoFocus={true}
             ref={textInput}
             onChange={(e) => {
