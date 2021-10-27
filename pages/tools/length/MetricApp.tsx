@@ -1,6 +1,6 @@
 // import { css } from '@emotion/react';
 import * as React from 'react';
-import { debounce } from '../utils';
+import { debounce } from 'utils';
 
 function reduceFraction(numerator: number, denominator: number) {
   function getGcd(a: number, b: number): number {
@@ -142,8 +142,54 @@ const MetricApp = () => {
     <div>
       <p>Metric App</p>
       <form>
+        <div>
+          Decimal:{' '}
+          <input
+            type="text"
+            inputMode="decimal"
+            className="border-4"
+            autoFocus={true}
+            ref={textInput}
+            onChange={(e) => {
+              setCmInput(parseToCm(e.target.value).toString());
+              debouncedCreateEntry(parseToCm(e.target.value));
+            }}
+            value={cmInput === 'NaN' ? '' : cmInput}
+          />
+        </div>
+        <div>
+          Numeric{' '}
+          <input
+            type="text"
+            inputMode="numeric"
+            className="border-4"
+            autoFocus={true}
+            ref={textInput}
+            onChange={(e) => {
+              setCmInput(parseToCm(e.target.value).toString());
+              debouncedCreateEntry(parseToCm(e.target.value));
+            }}
+            value={cmInput === 'NaN' ? '' : cmInput}
+          />
+        </div>
+        <div>
+          Tel{' '}
+          <input
+            type="text"
+            inputMode="tel"
+            className="border-4"
+            autoFocus={true}
+            ref={textInput}
+            onChange={(e) => {
+              setCmInput(parseToCm(e.target.value).toString());
+              debouncedCreateEntry(parseToCm(e.target.value));
+            }}
+            value={cmInput === 'NaN' ? '' : cmInput}
+          />
+        </div>
         <input
           type="text"
+          className="border-4"
           autoFocus={true}
           ref={textInput}
           onChange={(e) => {

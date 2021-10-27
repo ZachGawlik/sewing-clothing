@@ -12,7 +12,7 @@ const ToolsPage: NextPage = () => {
         <meta name="description" content="Sewing tools" />
       </Head>
 
-      <main className={styles.main}>
+      <main className={`${styles.main} prose`}>
         <h1
           css={css`
             color: #0070f3;
@@ -22,13 +22,16 @@ const ToolsPage: NextPage = () => {
             font-family: Menlo, Monaco, 'Courier New', Courier, monospace;
           `}
         >
-          <Link href="/">sewing.clothing</Link>/tools
+          <Link href="/">
+            <a>sewing.clothing</a>
+          </Link>
+          /tools
         </h1>
         <p>This will have all the future tools</p>
         <ul>
           <li>
-            <Link href="/tools/metric">
-              cm {'<->'} inch , Metric & Imperial Conversion
+            <Link href="/tools/length">
+              <a> cm {'<->'} inch , Metric & Imperial Conversion</a>
             </Link>
           </li>
           <li>GSM / Oz converter and reference</li>

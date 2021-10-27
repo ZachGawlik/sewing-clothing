@@ -12,7 +12,7 @@ const ResourcesPage: NextPage = () => {
         <meta name="description" content="Sewing resources" />
       </Head>
 
-      <main className={styles.main}>
+      <main className={`${styles.main} prose`}>
         <h1
           css={css`
             color: #0070f3;
@@ -22,13 +22,16 @@ const ResourcesPage: NextPage = () => {
             font-family: Menlo, Monaco, 'Courier New', Courier, monospace;
           `}
         >
-          <Link href="/">sewing.clothing</Link>/resources
+          <Link href="/">
+            <a>sewing.clothing</a>
+          </Link>
+          /resources
         </h1>
         <p>Aka links and book recommendations</p>
         <ul>
           <li>
             <a href="http://www.burieddiamond.com/blog/2021/10/5/my-fabric-bled-color-everywhere-how-to-save-fabric-when-the-color-is-bleeding">
-              Buried Diamond on fabric color bleeding - when tot use oxiclean &
+              Buried Diamond on fabric color bleeding - when to use oxiclean &
               color catchers & more
             </a>
           </li>
