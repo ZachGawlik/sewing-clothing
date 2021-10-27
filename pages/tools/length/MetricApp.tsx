@@ -1,5 +1,6 @@
 // import { css } from '@emotion/react';
 import * as React from 'react';
+import Link from 'next/link';
 import { debounce } from 'utils';
 
 function reduceFraction(numerator: number, denominator: number) {
@@ -17,6 +18,7 @@ TODOS:
  * Have 5/8s or 1/16s option
  * Commit history to localstorage
   Inch -> cm input.
+ * TODO: I should remove inputMode when inputting imperial
  * Mobile. How to deal with keyboard
  * Design. For all sizes.
  * ? Table as second "page" with input page as 100vh?
@@ -77,7 +79,7 @@ const InputTable = ({
   cmValues: Array<number>;
   inchResultFormat: INCH_RESULT_FORMATS;
 }) => (
-  <table>
+  <table className="font-mono table-fixed container mx-4">
     <thead>
       <tr>
         <th>cm</th>
@@ -85,10 +87,10 @@ const InputTable = ({
       </tr>
     </thead>
     <tbody>
-      {cmValues.map((cmDecimal) => (
-        <tr key={cmDecimal}>
-          <td>{cmDecimal}cm</td>
-          <td>
+      {cmValues.map((cmDecimal, index) => (
+        <tr key={index}>
+          <td className="w-1/2">{cmDecimal}cm</td>
+          <td className="w-1/2">
             {inchDecimalToHuman(cmToInchDecimal(cmDecimal), inchResultFormat)}
           </td>
         </tr>
@@ -117,7 +119,6 @@ const MetricApp = () => {
   }, []);
 
   const [cmInput, setCmInput] = React.useState<string>('');
-  // TODO: implement
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [inchResultFormat, setInchResultFormat] =
     React.useState<INCH_RESULT_FORMATS>(INCH_RESULT_FORMATS.SIXTEENTHS);
@@ -139,49 +140,76 @@ const MetricApp = () => {
 
   const latestInput = cmInput || cmInputHistory[0]?.toString();
 
-  /* TODO: I should remove inputMode when inputting imperial */
   return (
     <div>
-      <form autoComplete="off">
-        <div>
-          {/* text-lg is necessary to prevent ios zooming on focus */}
-          <input
-            className="border-4 border-purple-100 border-style-solid text-lg container bg-transparent"
-            type="text"
-            inputMode="decimal"
-            autoComplete="off"
-            autoFocus={true}
-            ref={textInput}
-            onChange={(e) => {
-              setCmInput(parseToCm(e.target.value).toString());
-              debouncedCreateEntry(parseToCm(e.target.value));
-            }}
-            value={cmInput === 'NaN' ? '' : cmInput}
+      <div
+        className="px-4"
+        css={{
+          minHeight: '90vh',
+        }}
+      >
+        <div className="mb-8 px-12">
+          <div className="border-dashed">
+            <Link href="/">
+              <a>sewing.clothing</a>
+            </Link>
+            <Link href="/tools">
+              <a>/tools</a>
+            </Link>
+            /length
+          </div>
+          <h1 className="font-mono text-2xl">Length converter</h1>
+        </div>
+        <form autoComplete="off">
+          <div>
+            {/* text-lg is necessary to prevent ios zooming on focus */}
+            <input
+              className="px-2 border-4 border-purple-100 border-solid text-lg container bg-transparent"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              autoFocus={true}
+              ref={textInput}
+              onChange={(e) => {
+                setCmInput(parseToCm(e.target.value).toString());
+                debouncedCreateEntry(parseToCm(e.target.value));
+              }}
+              value={cmInput === 'NaN' ? '' : cmInput}
+            />
+          </div>
+        </form>
+        <div className="flex font-mono mb-8">
+          <p className="flex-1">
+            <span className="text-xl text-pink-300 inline-block w-24 text-right">
+              {latestInput}
+            </span>
+            cm
+          </p>
+          <p className="flex-1">
+            <span className="text-xl text-blue-300">
+              {latestInput !== 'NaN' &&
+                inchDecimalToHuman(
+                  cmToInchDecimal(parseFloat(latestInput)),
+                  inchResultFormat
+                )}
+            </span>
+            in
+          </p>
+        </div>
+        <div className="mb-8">
+          <h3 className="text-2xl">History</h3>
+          <InputTable
+            cmValues={!cmInput ? cmInputHistory.slice(1) : cmInputHistory}
+            inchResultFormat={inchResultFormat}
           />
         </div>
-      </form>
-      <div className="flex font-mono mb-8">
-        <p className="flex-1">
-          <span className="text-xl text-pink-300">{latestInput}</span>
-          cm
-        </p>
-        <p className="flex-1">
-          <span className="text-xl text-blue-300">
-            {latestInput !== 'NaN' &&
-              inchDecimalToHuman(
-                cmToInchDecimal(parseFloat(latestInput)),
-                inchResultFormat
-              )}
-          </span>
-          in
-        </p>
       </div>
-      <InputTable cmValues={CM_TABLE} inchResultFormat={inchResultFormat} />
-      <h3>History</h3>
-      <InputTable
-        cmValues={!cmInput ? cmInputHistory.slice(1) : cmInputHistory}
-        inchResultFormat={inchResultFormat}
-      />
+      <div className="bg-gray-800">
+        <div className="px-4">
+          <h3 className="text-2xl">Reference</h3>
+          <InputTable cmValues={CM_TABLE} inchResultFormat={inchResultFormat} />
+        </div>
+      </div>
     </div>
   );
 };
