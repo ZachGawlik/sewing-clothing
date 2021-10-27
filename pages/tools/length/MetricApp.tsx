@@ -138,15 +138,16 @@ const MetricApp = () => {
 
   const latestInput = cmInput || cmInputHistory[0]?.toString();
 
+  /* TODO: I should remove inputMode when inputting imperial */
   return (
     <div>
       <p>Metric App</p>
       <form>
         <div>
-          Decimal:{' '}
           <input
             type="text"
             inputMode="decimal"
+            autoComplete="off"
             className="border-4"
             autoFocus={true}
             ref={textInput}
@@ -157,47 +158,6 @@ const MetricApp = () => {
             value={cmInput === 'NaN' ? '' : cmInput}
           />
         </div>
-        <div>
-          Numeric{' '}
-          <input
-            type="text"
-            inputMode="numeric"
-            className="border-4"
-            autoFocus={true}
-            ref={textInput}
-            onChange={(e) => {
-              setCmInput(parseToCm(e.target.value).toString());
-              debouncedCreateEntry(parseToCm(e.target.value));
-            }}
-            value={cmInput === 'NaN' ? '' : cmInput}
-          />
-        </div>
-        <div>
-          Tel{' '}
-          <input
-            type="text"
-            inputMode="tel"
-            className="border-4"
-            autoFocus={true}
-            ref={textInput}
-            onChange={(e) => {
-              setCmInput(parseToCm(e.target.value).toString());
-              debouncedCreateEntry(parseToCm(e.target.value));
-            }}
-            value={cmInput === 'NaN' ? '' : cmInput}
-          />
-        </div>
-        <input
-          type="text"
-          className="border-4"
-          autoFocus={true}
-          ref={textInput}
-          onChange={(e) => {
-            setCmInput(parseToCm(e.target.value).toString());
-            debouncedCreateEntry(parseToCm(e.target.value));
-          }}
-          value={cmInput === 'NaN' ? '' : cmInput}
-        />
       </form>
       <p>{latestInput}cm</p>
       <p>
