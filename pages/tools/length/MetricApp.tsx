@@ -171,8 +171,12 @@ const MetricApp = () => {
               autoFocus={true}
               ref={textInput}
               onChange={(e) => {
-                setCmInput(parseToCm(e.target.value).toString());
-                debouncedCreateEntry(parseToCm(e.target.value));
+                const sanitizedString = e.target.value
+                  .trim()
+                  .replaceAll(/[^\d\.]/g, '')
+                  .slice(0, 4);
+                setCmInput(sanitizedString);
+                debouncedCreateEntry(parseToCm(sanitizedString));
               }}
               value={cmInput === 'NaN' ? '' : cmInput}
             />

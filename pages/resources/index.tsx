@@ -38,6 +38,11 @@ const ResourcesPage: NextPage = () => {
           <li></li>
           <li></li>
         </ul>
+        <div>
+          <p>Images</p>
+          <p>Serger tension</p>
+          <img src="/serger.jpeg" alt="" />
+        </div>
       </main>
     </div>
   );
