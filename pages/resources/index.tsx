@@ -41,7 +41,7 @@ const ResourcesPage: NextPage = () => {
         <div>
           <p>Images</p>
           <p>Serger tension</p>
-          <img src="/serger.jpeg" alt="" />
+          <img src="/serger.jpg" alt="" />
         </div>
       </main>
     </div>
