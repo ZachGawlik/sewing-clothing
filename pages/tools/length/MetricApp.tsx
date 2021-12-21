@@ -2,45 +2,28 @@ import * as React from 'react';
 import cx from 'classnames';
 import { css } from '@emotion/react';
 import Link from 'next/link';
-import { debounce } from 'utils';
 import { useAppHeight } from 'utils/hooks';
+import debounce from 'lodash/debounce';
 
 enum ConversionType {
   fromInch = 'fromInch',
   fromCm = 'fromCm',
 }
 
-/* Mobile keyboard area */
-const MobileKeySet = {
+const MOBILE_KEYS = {
   [ConversionType.fromInch]: [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    'space',
-    '0',
-    '/',
-  ],
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9'],
+    ['space', '0', '/'],
+  ].flat(),
   [ConversionType.fromCm]: [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '.',
-    '0',
-  ],
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9'],
+    ['.', '0'],
+  ].flat(),
 };
-
 const mobileKeyDuration = 200;
 const MobileKey = ({
   value,
@@ -88,14 +71,13 @@ export function reduceFraction(numerator: number, denominator: number) {
 
 /*
 TODOS:
- * 61cm is reporting 24 0/1in . shouldnt show fraction
+ * I need to make blank history first-load state look better
+ * Mobile: history tape roll from bottom
+ * Mobile: have toggle for displaying guide
  * Have 1/8s or 1/16s option
  * Commit history to localstorage
   Inch -> cm input.
- * Design. For all sizes.
- * ? Table as second "page" with input page as 100vh?
- * 		Or only displaying together for large-enough resolutions.. if I figure out design that isn't clunky
- * Query params
+ * Quick improvements for tablet
  * Uhhhhhh yards <-> meters?
 */
 
@@ -158,6 +140,11 @@ const inputHistoryReducer = (
   }
 };
 
+const tableCell = css`
+  width: 10ch;
+  padding: 0.5ch;
+`;
+
 const InputTable = ({
   cmValues,
   inchResultFormat,
@@ -165,23 +152,24 @@ const InputTable = ({
   cmValues: Array<number>;
   inchResultFormat: INCH_RESULT_FORMATS;
 }) => (
-  <div className="px-4">
-    <table className="font-mono table-fixed w-full">
+  <div className="px-4 flex justify-center">
+    <table className="font-mono table-fixed">
       <thead>
         <tr>
           <th>cm</th>
-          <th>inches</th>
+          <th>inch</th>
         </tr>
       </thead>
       <tbody>
         {cmValues.map((cmDecimal, index) => (
-          <tr key={index}>
-            <td className="w-1/2">{cmDecimal}cm</td>
-            <td className="w-1/2">
+          <tr key={index} className="even:bg-gray-800">
+            <td css={tableCell}>{cmDecimal} cm</td>
+            <td css={tableCell}>
               {decimalToFractionStr(
                 cmToInchDecimal(cmDecimal),
                 inchResultFormat
               )}
+              {'"'}
             </td>
           </tr>
         ))}
@@ -227,141 +215,192 @@ const MetricApp = () => {
     []
   );
 
+  const createEntry = React.useCallback((newValue: number) => {
+    dispatchCmInputHistory({ type: 'add', payload: newValue });
+    setCmInput('');
+  }, []);
   const debouncedCreateEntry = React.useMemo(
-    () =>
-      debounce((newValue: number) => {
-        dispatchCmInputHistory({ type: 'add', payload: newValue });
-        setCmInput('');
-      }, 1500),
-    []
+    () => debounce(createEntry, 1500),
+    [createEntry]
+  );
+  const onCmInputChange = React.useCallback(
+    (cmString: string) => {
+      setCmInput(cmString);
+      const parsedCm = parseToCm(cmString);
+      if (cmString.length === 4 || parsedCm > 100) {
+        debouncedCreateEntry.cancel();
+        createEntry(parsedCm);
+      } else {
+        debouncedCreateEntry(parsedCm);
+      }
+    },
+    [createEntry, debouncedCreateEntry]
   );
 
   const latestInput = cmInput || cmInputHistory[0]?.toString();
 
+  const resultsDisplay = (
+    <div className="flex font-mono py-4 text-xl">
+      <p className="px-4">🔀</p>
+      <p className="flex-1 w-24">
+        <span
+          css={
+            cmInput === '' &&
+            css`
+              background-color: hsl(336, 69%, 20.4%);
+            `
+          }
+          className="text-pink-300 inline-block text-right px-px"
+        >
+          {latestInput}
+        </span>
+        cm
+      </p>
+      <p className="flex-1">
+        <span className="text-blue-300 px-px">
+          {!latestInput
+            ? ''
+            : decimalToFractionStr(
+                cmToInchDecimal(parseFloat(latestInput)),
+                inchResultFormat
+              )}
+        </span>
+        in
+      </p>
+    </div>
+  );
+
   return (
-    <div
-      className="flex flex-col"
-      css={css`
-        height: 100vh;
-        height: var(--app-height);
-      `}
-    >
+    <div>
       <div
-        className="overflow-y-scroll"
+        className="flex flex-col"
         css={css`
-          height: 67%;
+          height: 100vh;
+          height: var(--app-height);
+          overflow-y: auto;
         `}
       >
         <div
-          className="px-4"
+          className="overflow-y-scroll"
           css={css`
-            @media (min-width: 768px) {
-              min-height: 30vh;
+            @media (pointer: coarse) {
+              height: 45%;
             }
           `}
         >
-          <div className="mb-8 px-12">
-            <div className="border-dashed">
-              <Link href="/">
-                <a>sewing.clothing</a>
-              </Link>
-              <Link href="/tools">
-                <a>/tools</a>
-              </Link>
-              /length
+          <div
+            className="px-4"
+            css={css`
+              @media (min-width: 768px) {
+                min-height: 30vh;
+              }
+            `}
+          >
+            <div className="mb-8">
+              <div className="flex place-content-between">
+                <div>
+                  <Link href="/">
+                    <a className="text-blue-400 font-mono">sewing.clothing</a>
+                  </Link>
+                </div>
+                <div>
+                  <Link href="/tools">
+                    <a className="text-blue-400 font-mono">/tools</a>
+                  </Link>
+                </div>
+              </div>
+              <h1 className="text-2xl text-center">Length converter</h1>
             </div>
-            <h1 className="font-mono text-2xl">Length converter</h1>
           </div>
-          <form autoComplete="off">
-            <div>
-              <input
-                css={css`
-                  @media (pointer: coarse) {
-                    display: none;
-                  }
-                `}
-                className="px-2 border-4 border-purple-100 border-solid text-lg container bg-transparent"
-                type="text"
-                inputMode="decimal"
-                autoComplete="off"
-                autoFocus={true}
-                ref={textInput}
-                onChange={(e) => {
-                  const sanitizedString = e.target.value
-                    .trim()
-                    .replaceAll(/[^\d\.]/g, '')
-                    .slice(0, 4);
-                  setCmInput(sanitizedString);
-                  debouncedCreateEntry(parseToCm(sanitizedString));
-                }}
-                value={cmInput === 'NaN' ? '' : cmInput}
-              />
-            </div>
-          </form>
-          <div className="flex font-mono mb-8">
-            <p className="flex-1">
-              <span className="text-xl text-pink-300 inline-block w-24 text-right">
-                {latestInput}
-              </span>
-              cm
-            </p>
-            <p className="flex-1">
-              <span className="text-xl text-blue-300">
-                {!latestInput
-                  ? ''
-                  : decimalToFractionStr(
-                      cmToInchDecimal(parseFloat(latestInput)),
-                      inchResultFormat
-                    )}
-              </span>
-              in
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap">
-          <div className="p-2 w-full sm:w-1/2">
-            <h3 className="text-2xl">History</h3>
-            <InputTable
-              cmValues={!cmInput ? cmInputHistory.slice(1) : cmInputHistory}
-              inchResultFormat={inchResultFormat}
-            />
-          </div>
-          <div className="bg-gray-800 p-2 w-full sm:w-1/2">
-            <h3 className="text-2xl">Reference</h3>
-            <InputTable
-              cmValues={CM_TABLE}
-              inchResultFormat={inchResultFormat}
-            />
-          </div>
-        </div>
-      </div>
-      <div
-        className="shrink-0 bg-black flex flex-col touch-none"
-        css={css`
-          height: 33%;
-          padding-bottom: env(safe-area-inset-bottom, 50px);
+          <div
+            css={css`
+              @media (pointer: coarse) {
+                display: none;
+              }
+            `}
+          >
+            <form autoComplete="off">
+              <div>
+                <input
+                  className="px-2 border-4 border-purple-100 border-solid text-lg container bg-transparent"
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  autoFocus={true}
+                  ref={textInput}
+                  onChange={(e) => {
+                    const sanitizedString = e.target.value
+                      .trim()
+                      .replaceAll(/[^\d\.]/g, '')
+                      .slice(0, 4);
+                    // TODO: implement restrictions like for mobile input
+                    // where 4 chars is cool if it's 99.5 but not if 9999
 
-          z-index: 1; /* must be set for shadow to display */
-          box-shadow: 0px -5px 15px -5px black;
-          @media (pointer: fine) {
-            display: none;
-          }
-        `}
-      >
-        <div className="">{`CM -> Inch`}.</div>
-        <div className="h-full select-none pb-4 px-3">
-          <div className="grid grid-cols-3 grid-rows-4 h-full gap-4">
-            {MobileKeySet[conversionType].map((key: string) => (
-              <MobileKey
-                key={key}
-                value={key}
-                onClick={(newKey: string) => {
-                  const newCmInput = `${cmInput}${newKey}`;
-                  setCmInput(newCmInput);
-                  debouncedCreateEntry(parseToCm(newCmInput));
-                }}
+                    onCmInputChange(sanitizedString);
+                  }}
+                  value={cmInput === 'NaN' ? '' : cmInput}
+                />
+              </div>
+            </form>
+            {resultsDisplay}
+          </div>
+          <div className="flex flex-wrap">
+            <div className="p-2 w-full sm:w-1/2">
+              <h3 className="hidden sm:block text-2xl sm:text-center">
+                History
+              </h3>
+              <InputTable
+                cmValues={!cmInput ? cmInputHistory.slice(1) : cmInputHistory}
+                inchResultFormat={inchResultFormat}
               />
-            ))}
+            </div>
+            <div className="p-2 w-full mt-12 sm:mt-0 sm:w-1/2">
+              <h3 className="text-2xl sm:text-center">Reference</h3>
+              <InputTable
+                cmValues={CM_TABLE}
+                inchResultFormat={inchResultFormat}
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          className="shrink-0 bg-black flex flex-col touch-none"
+          css={css`
+            @media (pointer: fine) {
+              display: none;
+            }
+
+            height: 55%;
+            padding-bottom: env(safe-area-inset-bottom, 50px);
+
+            z-index: 1; /* must be set for shadow to display */
+            box-shadow: 0px -5px 15px -5px black;
+          `}
+        >
+          <div className="bg-stone-900 border-t border-stone-700">
+            {resultsDisplay}
+          </div>
+          <div className="h-full select-none py-4 px-3">
+            <div className="grid grid-cols-3 grid-rows-4 h-full gap-2">
+              {MOBILE_KEYS[conversionType].map((key: string) => (
+                <MobileKey
+                  key={key}
+                  value={key}
+                  onClick={(newKey: string) => {
+                    if (newKey === '.' && cmInput[cmInput.length - 1] === '.') {
+                      return;
+                    }
+                    if (
+                      cmInput.length < 4 &&
+                      (cmInput === '.' || +cmInput < 100)
+                    ) {
+                      const newCmInput = `${cmInput}${newKey}`;
+                      onCmInputChange(newCmInput);
+                    }
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
