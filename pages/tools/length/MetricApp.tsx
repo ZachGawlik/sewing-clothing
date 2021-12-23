@@ -165,6 +165,63 @@ const inputHistoryReducer = (
   }
 };
 
+type ConversionTypeState = {
+  conversionUnits: ConversionType;
+  conversionOptions: {
+    [ConversionType.fromCm]: {
+      precision: INCH_RESULT_FORMATS;
+    };
+  };
+};
+const initialConversionTypeState = {
+  conversionUnits: ConversionType.fromCm,
+  conversionOptions: {
+    [ConversionType.fromCm]: {
+      precision: INCH_RESULT_FORMATS.SIXTEENTHS,
+    },
+  },
+};
+type ConversionTypeActionType =
+  | { type: 'toggleUnits' }
+  | { type: 'toggleInchPrecision' };
+
+const conversionTypeReducer = (
+  state: ConversionTypeState,
+  action: ConversionTypeActionType
+) => {
+  switch (action.type) {
+    case 'toggleUnits':
+      return {
+        ...state,
+        conversionUnits:
+          state.conversionUnits === ConversionType.fromCm
+            ? ConversionType.fromInch
+            : ConversionType.fromCm,
+      };
+    case 'toggleInchPrecision':
+      if (state.conversionUnits !== ConversionType.fromCm) {
+        throw new Error(
+          'Cannot change inch output precision when not converting from cm'
+        );
+      }
+      return {
+        ...state,
+        conversionOptions: {
+          ...state.conversionOptions,
+          [ConversionType.fromCm]: {
+            precision:
+              state.conversionOptions[state.conversionUnits].precision ===
+              INCH_RESULT_FORMATS.EIGHTHS
+                ? INCH_RESULT_FORMATS.SIXTEENTHS
+                : INCH_RESULT_FORMATS.EIGHTHS,
+          },
+        },
+      };
+    default:
+      throw new Error();
+  }
+};
+
 const tableCell = css`
   width: 11ch;
   padding: 0.5ch;
@@ -211,9 +268,8 @@ const MetricApp = () => {
     textInput.current?.focus();
   }, []);
 
-  const [conversionType, setConversionType] = React.useState(
-    ConversionType.fromCm
-  );
+  const [{ conversionUnits, conversionOptions }, dispatchConversionType] =
+    React.useReducer(conversionTypeReducer, initialConversionTypeState);
 
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -231,9 +287,6 @@ const MetricApp = () => {
   }, []);
 
   const [cmInput, setCmInput] = React.useState<string>('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [inchResultFormat, setInchResultFormat] =
-    React.useState<INCH_RESULT_FORMATS>(INCH_RESULT_FORMATS.SIXTEENTHS);
 
   const [{ cmInputHistory, hasTypedThisSession }, dispatchCmInputHistory] =
     React.useReducer(inputHistoryReducer, initialInputHistoryState);
@@ -311,11 +364,28 @@ const MetricApp = () => {
             ? firstLoadBlankDisplay
             : decimalToFractionStr(
                 cmToInchDecimal(parseToCm(latestInput)),
-                inchResultFormat
+                conversionOptions[ConversionType.fromCm].precision
               )}
         </span>
         in
       </p>
+      {conversionUnits === ConversionType.fromCm && (
+        <p
+          className={cx(
+            {
+              'bg-stone-700':
+                conversionOptions[ConversionType.fromCm].precision ===
+                INCH_RESULT_FORMATS.SIXTEENTHS,
+            },
+            'px-2 mx-2 rounded'
+          )}
+          onClick={() =>
+            dispatchConversionType({ type: 'toggleInchPrecision' })
+          }
+        >
+          🎯
+        </p>
+      )}
     </div>
   );
 
@@ -401,7 +471,9 @@ const MetricApp = () => {
                 </h3>
                 <InputTable
                   cmValues={cmInputHistory}
-                  inchResultFormat={inchResultFormat}
+                  inchResultFormat={
+                    conversionOptions[ConversionType.fromCm].precision
+                  }
                 />
               </div>
             )}
@@ -409,7 +481,9 @@ const MetricApp = () => {
               <h3 className="text-2xl sm:text-center">Reference</h3>
               <InputTable
                 cmValues={CM_TABLE}
-                inchResultFormat={inchResultFormat}
+                inchResultFormat={
+                  conversionOptions[ConversionType.fromCm].precision
+                }
               />
             </div>
           </div>
@@ -433,7 +507,7 @@ const MetricApp = () => {
           </div>
           <div className="h-full select-none py-4 px-3">
             <div className="grid grid-cols-3 grid-rows-4 h-full gap-2">
-              {MOBILE_KEYS[conversionType].map((key: string) => (
+              {MOBILE_KEYS[conversionUnits].map((key: string) => (
                 <MobileKey
                   key={key}
                   value={key}
