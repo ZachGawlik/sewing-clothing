@@ -321,6 +321,10 @@ const MetricApp = () => {
   );
   const onCmInputChange = React.useCallback(
     (cmString: string) => {
+      const l = cmString.length;
+      if (l >= 2 && cmString[l - 1] === '.' && cmString[l - 2] === '.') {
+        return;
+      }
       setCmInput(cmString);
       const parsedCm = parseToCm(cmString);
       if (cmString.length === 4 || parsedCm > 100) {
@@ -452,8 +456,6 @@ const MetricApp = () => {
                       .trim()
                       .replaceAll(/[^\d\.]/g, '')
                       .slice(0, 4);
-                    // TODO: implement restrictions like for mobile input
-                    // where 4 chars is cool if it's 99.5 but not if 9999
 
                     onCmInputChange(sanitizedString);
                   }}
@@ -512,16 +514,7 @@ const MetricApp = () => {
                   key={key}
                   value={key}
                   onClick={(newKey: string) => {
-                    if (newKey === '.' && cmInput[cmInput.length - 1] === '.') {
-                      return;
-                    }
-                    if (
-                      cmInput.length < 4 &&
-                      (cmInput === '.' || +cmInput < 100)
-                    ) {
-                      const newCmInput = `${cmInput}${newKey}`;
-                      onCmInputChange(newCmInput);
-                    }
+                    onCmInputChange(`${cmInput}${newKey}`);
                   }}
                 />
               ))}
