@@ -10,6 +10,20 @@ enum ConversionType {
   fromCm = 'fromCm',
 }
 
+const useIsTouchDevice = () => {
+  const [isTouchDevice, setIsTouchDevice] = React.useState(false);
+  React.useEffect(() => {
+    const mql = window.matchMedia('(pointer: coarse)');
+    mql.onchange = (e) => {
+      setIsTouchDevice(e.matches);
+    };
+    return () => {
+      mql.onchange = null;
+    };
+  }, []);
+  return isTouchDevice;
+};
+
 const MOBILE_KEYS = {
   [ConversionType.fromInch]: [
     ['1', '2', '3'],
@@ -71,11 +85,7 @@ export function reduceFraction(numerator: number, denominator: number) {
 
 /*
 TODOS:
- * I need to make blank history first-load state look better
- * Mobile: history tape roll from bottom
- * Mobile: have toggle for displaying guide
  * Have 1/8s or 1/16s option
- * Commit history to localstorage
   Inch -> cm input.
  * Quick improvements for tablet
  * Uhhhhhh yards <-> meters?
@@ -124,24 +134,37 @@ const CM_TABLE = [0.5, 1, 2, 3, 4, 5, 6, 10];
 
 type InputHistoryActionType =
   | { type: 'add'; payload: number }
-  | { type: 'clear'; payload: undefined };
+  | { type: 'load'; payload: Array<number> };
 
+const initialInputHistoryState = {
+  hasTypedThisSession: false,
+  cmInputHistory: [],
+};
 const inputHistoryReducer = (
-  state: Array<number>,
+  state: {
+    hasTypedThisSession: boolean;
+    cmInputHistory: Array<number>;
+  },
   action: InputHistoryActionType
 ) => {
   switch (action.type) {
+    case 'load':
+      return {
+        hasTypedThisSession: false,
+        cmInputHistory: action.payload,
+      };
     case 'add':
-      return [action.payload, ...state].slice(0, 10);
-    case 'clear':
-      return [];
+      return {
+        hasTypedThisSession: true,
+        cmInputHistory: [action.payload, ...state.cmInputHistory].slice(0, 10),
+      };
     default:
       throw new Error();
   }
 };
 
 const tableCell = css`
-  width: 10ch;
+  width: 11ch;
   padding: 0.5ch;
 `;
 
@@ -210,10 +233,28 @@ const MetricApp = () => {
   const [inchResultFormat, setInchResultFormat] =
     React.useState<INCH_RESULT_FORMATS>(INCH_RESULT_FORMATS.SIXTEENTHS);
 
-  const [cmInputHistory, dispatchCmInputHistory] = React.useReducer(
-    inputHistoryReducer,
-    []
-  );
+  const [{ cmInputHistory, hasTypedThisSession }, dispatchCmInputHistory] =
+    React.useReducer(inputHistoryReducer, initialInputHistoryState);
+  React.useEffect(() => {
+    // State could instead be initialized on client in first render,
+    // but it leads to many SSR warnings, and suppressHydrationWarning
+    // uses to counteract it. It's not worth it. It still looks instant.
+    try {
+      const storedHistory = window.localStorage.getItem('cmInputHistory');
+      if (storedHistory) {
+        dispatchCmInputHistory({
+          type: 'load',
+          payload: JSON.parse(storedHistory),
+        });
+      }
+    } catch (e) {}
+  }, []);
+  React.useEffect(() => {
+    window.localStorage.setItem(
+      'cmInputHistory',
+      JSON.stringify(cmInputHistory)
+    );
+  }, [cmInputHistory]);
 
   const createEntry = React.useCallback((newValue: number) => {
     dispatchCmInputHistory({ type: 'add', payload: newValue });
@@ -237,8 +278,14 @@ const MetricApp = () => {
     [createEntry, debouncedCreateEntry]
   );
 
-  const latestInput = cmInput || cmInputHistory[0]?.toString();
+  const isTouchDevice = useIsTouchDevice();
 
+  const latestInput =
+    cmInput || (hasTypedThisSession ? cmInputHistory[0]?.toString() : null);
+
+  const firstLoadBlankDisplay = (
+    <span className="underline whitespace-pre">{'   '}</span>
+  );
   const resultsDisplay = (
     <div className="flex font-mono py-4 text-xl">
       <p className="px-4">🔀</p>
@@ -252,14 +299,14 @@ const MetricApp = () => {
           }
           className="text-pink-300 inline-block text-right px-px"
         >
-          {latestInput}
+          {latestInput || firstLoadBlankDisplay}
         </span>
         cm
       </p>
       <p className="flex-1">
         <span className="text-blue-300 px-px">
           {!latestInput
-            ? ''
+            ? firstLoadBlankDisplay
             : decimalToFractionStr(
                 cmToInchDecimal(parseFloat(latestInput)),
                 inchResultFormat
@@ -345,16 +392,18 @@ const MetricApp = () => {
             {resultsDisplay}
           </div>
           <div className="flex flex-wrap">
-            <div className="p-2 w-full sm:w-1/2">
-              <h3 className="hidden sm:block text-2xl sm:text-center">
-                History
-              </h3>
-              <InputTable
-                cmValues={!cmInput ? cmInputHistory.slice(1) : cmInputHistory}
-                inchResultFormat={inchResultFormat}
-              />
-            </div>
-            <div className="p-2 w-full mt-12 sm:mt-0 sm:w-1/2">
+            {cmInputHistory.length > 0 && (
+              <div className="p-2 w-full sm:w-1/2">
+                <h3 className="hidden sm:block text-2xl sm:text-center">
+                  History
+                </h3>
+                <InputTable
+                  cmValues={cmInputHistory}
+                  inchResultFormat={inchResultFormat}
+                />
+              </div>
+            )}
+            <div className="p-2 w-full mt-12 sm:mt-0 sm:w-1/2" key="reference">
               <h3 className="text-2xl sm:text-center">Reference</h3>
               <InputTable
                 cmValues={CM_TABLE}
