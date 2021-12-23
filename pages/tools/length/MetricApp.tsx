@@ -92,7 +92,9 @@ TODOS:
 */
 
 const parseToCm = (strInput: string) => {
-  return parseFloat(parseFloat(strInput.trim()).toFixed(2));
+  return strInput === '.'
+    ? 0
+    : parseFloat(parseFloat(strInput.trim()).toFixed(2));
 };
 
 export enum INCH_RESULT_FORMATS {
@@ -308,7 +310,7 @@ const MetricApp = () => {
           {!latestInput
             ? firstLoadBlankDisplay
             : decimalToFractionStr(
-                cmToInchDecimal(parseFloat(latestInput)),
+                cmToInchDecimal(parseToCm(latestInput)),
                 inchResultFormat
               )}
         </span>
