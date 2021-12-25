@@ -15,10 +15,14 @@ describe('MetricApp', () => {
     ];
     tests.forEach(({ decimal, sixteenths, eighths }) => {
       expect(
-        decimalToFractionStr(decimal, INCH_RESULT_FORMATS.SIXTEENTHS)
+        decimalToFractionStr(decimal, {
+          precision: INCH_RESULT_FORMATS.SIXTEENTHS,
+        })
       ).toEqual(sixteenths);
       expect(
-        decimalToFractionStr(decimal, INCH_RESULT_FORMATS.EIGHTHS)
+        decimalToFractionStr(decimal, {
+          precision: INCH_RESULT_FORMATS.EIGHTHS,
+        })
       ).toEqual(eighths);
     });
   });

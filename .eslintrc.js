@@ -9,8 +9,8 @@ module.exports = {
     __PATH_PREFIX__: true,
   },
   rules: {
-    // TODO: can i configure this just for js idk
     'no-unused-vars': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
   },
 };
