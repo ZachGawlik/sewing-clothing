@@ -15,6 +15,7 @@ const useIsTouchDevice = () => {
   const [isTouchDevice, setIsTouchDevice] = React.useState(false);
   React.useEffect(() => {
     const mql = window.matchMedia('(pointer: coarse)');
+    setIsTouchDevice(mql.matches);
     mql.onchange = (e) => {
       setIsTouchDevice(e.matches);
     };
@@ -91,7 +92,7 @@ TODOS:
  * Uhhhhhh yards <-> meters?
 */
 
-const parseToCm = (strInput: string) => {
+const parseToDecimal = (strInput: string) => {
   return strInput === '.'
     ? 0
     : parseFloat(parseFloat(strInput.trim()).toFixed(2));
@@ -102,7 +103,7 @@ export enum INCH_RESULT_FORMATS {
   EIGHTHS = 'EIGHTHS',
 }
 
-const cmToInchDecimal = (cmDecimal: number) => cmDecimal / 2.54;
+const INCH_TO_CM_RATIO = 2.54;
 
 const decimalToFraction = (inchDecimal: number, precision: number) => {
   const whole = Math.floor(inchDecimal);
@@ -237,6 +238,10 @@ const useInputState = () => {
   };
 };
 
+// sanitizeKeyboardInput = Determines if something is allowed to be raw input
+// parseInput = Actually understand raw input to store and convert
+// Separating these prevent disrupting input as user types
+//  e.g. user typing 01 instead of "1"
 const ConversionImplemention = {
   [ConversionType.fromCm]: {
     reference: [0.5, 1, 2, 3, 4, 5, 6, 10],
@@ -244,12 +249,41 @@ const ConversionImplemention = {
     toUnitHeader: 'in',
     fromUnitInline: 'cm',
     toUnitInline: '"',
+    sanitizeKeyboardInput: (strInput: string) => {
+      return strInput
+        .trim()
+        .replaceAll(/[^\d\.]/g, '')
+        .slice(0, 4);
+    },
+    parseInput: (cmString: string) => parseToDecimal(cmString),
+    handleNewInput: (cmString: string) => {
+      if (
+        cmString.match(/\d{4}/) || // prevent pasting in 1234. It's already impossible type this from below rules
+        (cmString[0] === '.' && cmString[2] === '.') || // prevent .1.
+        (cmString.length >= 2 &&
+          cmString[cmString.length - 2] === '.' &&
+          cmString[cmString.length - 1] === '.') // prevent 2..
+      ) {
+        return 'prevent';
+      }
+
+      if (
+        cmString.match(/^\d{3}$/) || // 123
+        cmString.length === 4 || // 12.3, 1.23, 0.12
+        (cmString.length === 3 && cmString[0] === '.') // .12
+      ) {
+        return 'flush';
+      } else {
+        // e.g. "1" "12." "1.2" "0.1"
+        return 'debounce';
+      }
+    },
     convert: (
       fromValue: number,
       conversionOptions: InputState[ConversionType.fromCm]['conversionOptions']
     ) => {
       return decimalToFractionStr(
-        cmToInchDecimal(fromValue),
+        fromValue / INCH_TO_CM_RATIO,
         conversionOptions
       );
     },
@@ -303,31 +337,35 @@ const InputTable = ({
   conversionType: ConversionType;
   convert: (fromValue: number) => string;
   fromValues: Array<number>;
-}) => (
-  <div className="px-4 flex justify-center">
-    <table className="font-mono table-fixed">
-      <thead>
-        <tr>
-          <th>cm</th>
-          <th>inch</th>
-        </tr>
-      </thead>
-      <tbody>
-        {fromValues.map((from, index: number) => (
-          <tr key={index} className="even:bg-gray-800">
-            <td css={tableCell}>
-              {from} {ConversionImplemention[conversionType].fromUnitInline}
-            </td>
-            <td css={tableCell}>
-              {convert(from)}
-              {ConversionImplemention[conversionType].toUnitInline}
-            </td>
+}) => {
+  const { fromUnitHeader, toUnitHeader, fromUnitInline, toUnitInline } =
+    ConversionImplemention[conversionType];
+  return (
+    <div className="px-4 flex justify-center">
+      <table className="font-mono table-fixed">
+        <thead>
+          <tr>
+            <th>{fromUnitHeader}</th>
+            <th>{toUnitHeader}</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
+        </thead>
+        <tbody>
+          {fromValues.map((from, index: number) => (
+            <tr key={index} className="even:bg-gray-800">
+              <td css={tableCell}>
+                {from} {fromUnitInline}
+              </td>
+              <td css={tableCell}>
+                {convert(from)}
+                {toUnitInline}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 const MetricApp = () => {
   useAppHeight();
@@ -352,7 +390,7 @@ const MetricApp = () => {
     };
   }, []);
 
-  const [cmInput, setCmInput] = React.useState<string>('');
+  const [currentInput, setCurrentInput] = React.useState<string>('');
 
   const { inputState, dispatchInputState } = useInputState();
   const { activeConversion, shouldShowEmptyInput } = inputState;
@@ -365,7 +403,7 @@ const MetricApp = () => {
   const createEntry = React.useCallback(
     (newValue: number) => {
       dispatchInputState({ type: 'add', payload: newValue });
-      setCmInput('');
+      setCurrentInput('');
     },
     [dispatchInputState]
   );
@@ -373,24 +411,29 @@ const MetricApp = () => {
     () => debounce(createEntry, 1500),
     [createEntry]
   );
-  const onCmInputChange = React.useCallback(
-    (cmString: string) => {
-      setCmInput(cmString);
-      const parsedCm = parseToCm(cmString);
-      if (cmString.length === 4 || parsedCm > 100) {
-        debouncedCreateEntry(parsedCm);
+  const onCurrentInputChange = React.useCallback(
+    (inputStr: string) => {
+      const handle =
+        ConversionImplemention[activeConversion].handleNewInput(inputStr);
+      if (handle === 'prevent') {
+        return;
+      }
+      const parsedInput =
+        ConversionImplemention[activeConversion].parseInput(inputStr);
+      setCurrentInput(inputStr);
+      debouncedCreateEntry(parsedInput);
+      if (handle === 'flush') {
         debouncedCreateEntry.flush();
-      } else {
-        debouncedCreateEntry(parsedCm);
       }
     },
-    [debouncedCreateEntry]
+    [debouncedCreateEntry, activeConversion]
   );
 
   const isTouchDevice = useIsTouchDevice();
 
   const latestInput =
-    cmInput || (shouldShowEmptyInput ? null : conversionHistory[0]?.toString());
+    currentInput ||
+    (shouldShowEmptyInput ? null : conversionHistory[0]?.toString());
 
   const firstLoadBlankDisplay = (
     <span className="underline whitespace-pre">{'   '}</span>
@@ -400,11 +443,20 @@ const MetricApp = () => {
 
   const resultsDisplay = (
     <div className="flex font-mono py-4 text-xl">
-      <p className="px-4">🔀</p>
+      <p
+        className="px-4"
+        onClick={() => {
+          setCurrentInput('');
+          debouncedCreateEntry.flush();
+          // TODO: actually toggle
+        }}
+      >
+        🔀
+      </p>
       <p className="flex-1 w-24">
         <span
           css={
-            cmInput === '' &&
+            currentInput === '' &&
             css`
               background-color: hsl(336, 69%, 20.4%);
             `
@@ -420,7 +472,9 @@ const MetricApp = () => {
           {!latestInput
             ? firstLoadBlankDisplay
             : ConversionImplemention[activeConversion].convert(
-                parseToCm(latestInput),
+                ConversionImplemention[activeConversion].parseInput(
+                  latestInput
+                ),
                 conversionOptions
               )}
         </span>
@@ -492,13 +546,13 @@ const MetricApp = () => {
                   autoFocus={true}
                   ref={textInput}
                   onChange={(e) => {
-                    const sanitizedString = e.target.value
-                      .trim()
-                      .replaceAll(/[^\d\.]/g, '')
-                      .slice(0, 4);
-                    onCmInputChange(sanitizedString);
+                    onCurrentInputChange(
+                      ConversionImplemention[
+                        activeConversion
+                      ].sanitizeKeyboardInput(e.target.value)
+                    );
                   }}
-                  value={cmInput === 'NaN' ? '' : cmInput}
+                  value={currentInput === 'NaN' ? '' : currentInput}
                 />
               </div>
             </form>
@@ -537,46 +591,35 @@ const MetricApp = () => {
             </div>
           </div>
         </div>
-        <div
-          className="shrink-0 bg-black flex flex-col touch-none"
-          css={css`
-            @media (pointer: fine) {
-              display: none;
-            }
+        {isTouchDevice && (
+          <div
+            className="shrink-0 bg-black flex flex-col touch-none"
+            css={css`
+              height: 55%;
+              padding-bottom: env(safe-area-inset-bottom, 50px);
 
-            height: 55%;
-            padding-bottom: env(safe-area-inset-bottom, 50px);
-
-            z-index: 1; /* must be set for shadow to display */
-            box-shadow: 0px -5px 15px -5px black;
-          `}
-        >
-          <div className="bg-stone-900 border-t border-stone-700">
-            {resultsDisplay}
-          </div>
-          <div className="h-full select-none py-4 px-3">
-            <div className="grid grid-cols-3 grid-rows-4 h-full gap-2">
-              {MOBILE_KEYS[activeConversion].map((key: string) => (
-                <MobileKey
-                  key={key}
-                  value={key}
-                  onClick={(newKey: string) => {
-                    if (newKey === '.' && cmInput[cmInput.length - 1] === '.') {
-                      return;
-                    }
-                    if (
-                      cmInput.length < 4 &&
-                      (cmInput === '.' || +cmInput < 100)
-                    ) {
-                      const newCmInput = `${cmInput}${newKey}`;
-                      onCmInputChange(newCmInput);
-                    }
-                  }}
-                />
-              ))}
+              z-index: 1; /* must be set for shadow to display */
+              box-shadow: 0px -5px 15px -5px black;
+            `}
+          >
+            <div className="bg-stone-900 border-t border-stone-700">
+              {resultsDisplay}
+            </div>
+            <div className="h-full select-none py-4 px-3">
+              <div className="grid grid-cols-3 grid-rows-4 h-full gap-2">
+                {MOBILE_KEYS[activeConversion].map((key: string) => (
+                  <MobileKey
+                    key={key}
+                    value={key}
+                    onClick={(newKey: string) => {
+                      onCurrentInputChange(`${currentInput}${newKey}`);
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
