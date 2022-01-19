@@ -138,12 +138,31 @@ const fromInchImplementation = {
     ['1', '2', '3'],
     ['4', '5', '6'],
     ['7', '8', '9'],
-    ['space', '0', '/'],
+    [' ', '0', '/'],
   ].flat(),
   parseInput: (inchString: string) => inchString, // TODO:
-  handleNewInput: () => {
-    // I gotta do some amount of max input size limiting.
-    // return 'prevent';
+  handleNewInput: (inchString: string) => {
+    // TODO: At some point will  want to translate some of these "can't add space next" "can't add slash next"
+    //       as legit disabling the mobile key input button. Not sure how to do that in a way that isn't distracting
+    //       and in a way that could maybe reuse some of this logic that needs to exist for desktop input
+    if (
+      [' ', '/'].includes(inchString) ||
+      inchString.match(/\s.*\s/) || // "1 1 "
+      inchString.match(/\s\//) || // "1 /"
+      inchString.match(/\/\s/) || // "1/ "
+      inchString.match(/\/0+$/) // "1/0 "
+    ) {
+      return 'prevent';
+    }
+
+    if (
+      inchString.match(/.*\/[2-9]$/) ||
+      inchString.match(/.*\/1[0-9]$/) ||
+      inchString.match(/\d\d\d+/)
+    ) {
+      return 'flush';
+    }
+
     return 'debounce';
   },
   sanitizeKeyboardInput: (strInput: string) => {
