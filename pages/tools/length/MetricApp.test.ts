@@ -1,4 +1,4 @@
-import { decimalToFractionStr, INCH_RESULT_FORMATS } from './MetricApp';
+import { decimalToFractionStr, INCH_RESULT_FORMATS } from './constants';
 
 describe('MetricApp', () => {
   it('decimalToFractionStr', () => {

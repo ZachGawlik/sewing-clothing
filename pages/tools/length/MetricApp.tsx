@@ -2,14 +2,14 @@ import * as React from 'react';
 import cx from 'classnames';
 import { css } from '@emotion/react';
 import Link from 'next/link';
-import { useAppHeight } from 'utils/hooks';
 import debounce from 'lodash/debounce';
 import immer from 'immer';
-
-enum ConversionType {
-  fromInch = 'fromInch',
-  fromCm = 'fromCm',
-}
+import { useAppHeight } from 'utils/hooks';
+import {
+  ConversionType,
+  IMPLEMENTATIONS,
+  INCH_RESULT_FORMATS,
+} from './constants';
 
 const useIsTouchDevice = () => {
   const [isTouchDevice, setIsTouchDevice] = React.useState(false);
@@ -26,20 +26,6 @@ const useIsTouchDevice = () => {
   return isTouchDevice;
 };
 
-const MOBILE_KEYS = {
-  [ConversionType.fromInch]: [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-    ['space', '0', '/'],
-  ].flat(),
-  [ConversionType.fromCm]: [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-    ['.', '0'],
-  ].flat(),
-};
 const mobileKeyDuration = 200;
 const MobileKey = ({
   value,
@@ -77,65 +63,17 @@ const MobileKey = ({
 
 /* Rest */
 
-export function reduceFraction(numerator: number, denominator: number) {
-  function getGcd(a: number, b: number): number {
-    return b ? getGcd(b, a % b) : a;
-  }
-  const gcd = getGcd(numerator, denominator);
-  return [numerator / gcd, denominator / gcd];
-}
-
 /*
 TODOS:
  * Inch -> cm input.
  * Quick improvements for tablet
  * Uhhhhhh yards <-> meters?
+ * Use locale to determine "." vs "," separator
 */
-
-const parseToDecimal = (strInput: string) => {
-  return strInput === '.'
-    ? 0
-    : parseFloat(parseFloat(strInput.trim()).toFixed(2));
-};
-
-export enum INCH_RESULT_FORMATS {
-  SIXTEENTHS = 'SIXTEENTHS',
-  EIGHTHS = 'EIGHTHS',
-}
-
-const INCH_TO_CM_RATIO = 2.54;
-
-const decimalToFraction = (inchDecimal: number, precision: number) => {
-  const whole = Math.floor(inchDecimal);
-  const initialNumerator = Math.round((inchDecimal % 1) * precision);
-  if (initialNumerator === 0) {
-    return { whole, numerator: 0, denominator: precision };
-  } else if (initialNumerator === precision) {
-    return { whole: whole + 1, numerator: 0, denominator: precision };
-  }
-
-  const [numerator, denominator] = reduceFraction(initialNumerator, precision);
-  return { whole, numerator, denominator };
-};
-export const decimalToFractionStr = (
-  inchDecimal: number,
-  conversionOptions: { precision: INCH_RESULT_FORMATS }
-) => {
-  const { whole, numerator, denominator } = decimalToFraction(
-    inchDecimal,
-    conversionOptions.precision === INCH_RESULT_FORMATS.EIGHTHS ? 8 : 16
-  );
-  if (numerator === 0) {
-    return `${whole}`;
-  } else if (whole === 0) {
-    return `${numerator}/${denominator}`;
-  }
-  return `${whole} ${numerator}/${denominator}`;
-};
 
 const initialInputState = {
   shouldShowEmptyInput: true,
-  activeConversion: ConversionType.fromCm,
+  conversionType: ConversionType.fromCm,
   [ConversionType.fromCm]: {
     history: [],
     conversionOptions: {
@@ -148,24 +86,24 @@ const initialInputState = {
   },
 };
 
-type InputState = {
+export type InputState = {
   shouldShowEmptyInput: boolean;
-  activeConversion: ConversionType;
+  conversionType: ConversionType;
 
   [ConversionType.fromCm]: {
-    history: Array<number>;
+    history: Array<string>;
     conversionOptions: {
       precision: INCH_RESULT_FORMATS;
     };
   };
   [ConversionType.fromInch]: {
-    history: Array<number>;
+    history: Array<string>;
     conversionOptions: Record<string, never>;
   };
 };
 
 type InputActionType =
-  | { type: 'add'; payload: number }
+  | { type: 'add'; payload: string }
   | { type: 'load'; payload: InputState }
   | { type: 'toggleUnits' }
   | { type: 'toggleInchPrecision' };
@@ -180,19 +118,19 @@ const inputReducer = (state: InputState, action: InputActionType) => {
     case 'add':
       return immer(state, (draft) => {
         draft.shouldShowEmptyInput = false;
-        draft[draft.activeConversion].history.unshift(action.payload);
-        draft[draft.activeConversion].history.splice(10);
+        draft[draft.conversionType].history.unshift(action.payload);
+        draft[draft.conversionType].history.splice(10);
       });
     case 'toggleUnits':
       return immer(state, (draft) => {
         draft.shouldShowEmptyInput = true;
-        draft.activeConversion =
-          draft.activeConversion === ConversionType.fromCm
+        draft.conversionType =
+          draft.conversionType === ConversionType.fromCm
             ? ConversionType.fromInch
             : ConversionType.fromCm;
       });
     case 'toggleInchPrecision':
-      if (state.activeConversion !== ConversionType.fromCm) {
+      if (state.conversionType !== ConversionType.fromCm) {
         throw new Error(
           'Cannot change inch output precision when not converting from cm'
         );
@@ -237,92 +175,9 @@ const useInputState = () => {
     dispatchInputState,
   };
 };
-
-// sanitizeKeyboardInput = Determines if something is allowed to be raw input
-// parseInput = Actually understand raw input to store and convert
-// Separating these prevent disrupting input as user types
-//  e.g. user typing 01 instead of "1"
-const ConversionImplemention = {
-  [ConversionType.fromCm]: {
-    reference: [0.5, 1, 2, 3, 4, 5, 6, 10],
-    fromUnitHeader: 'cm',
-    toUnitHeader: 'in',
-    fromUnitInline: 'cm',
-    toUnitInline: '"',
-    sanitizeKeyboardInput: (strInput: string) => {
-      return strInput
-        .trim()
-        .replaceAll(/[^\d\.]/g, '')
-        .slice(0, 4);
-    },
-    parseInput: (cmString: string) => parseToDecimal(cmString),
-    handleNewInput: (cmString: string) => {
-      if (
-        cmString.match(/\d{4}/) || // prevent pasting in 1234. It's already impossible type this from below rules
-        (cmString[0] === '.' && cmString[2] === '.') || // prevent .1.
-        (cmString.length >= 2 &&
-          cmString[cmString.length - 2] === '.' &&
-          cmString[cmString.length - 1] === '.') // prevent 2..
-      ) {
-        return 'prevent';
-      }
-
-      if (
-        cmString.match(/^\d{3}$/) || // 123
-        cmString.length === 4 || // 12.3, 1.23, 0.12
-        (cmString.length === 3 && cmString[0] === '.') // .12
-      ) {
-        return 'flush';
-      } else {
-        // e.g. "1" "12." "1.2" "0.1"
-        return 'debounce';
-      }
-    },
-    convert: (
-      fromValue: number,
-      conversionOptions: InputState[ConversionType.fromCm]['conversionOptions']
-    ) => {
-      return decimalToFractionStr(
-        fromValue / INCH_TO_CM_RATIO,
-        conversionOptions
-      );
-    },
-    OptionsComponent: ({
-      conversionOptions,
-      dispatchInputState,
-    }: {
-      conversionOptions: InputState[ConversionType.fromCm]['conversionOptions'];
-      dispatchInputState: ReturnType<
-        typeof useInputState
-      >['dispatchInputState'];
-    }) => (
-      <p
-        className={cx(
-          {
-            'bg-stone-700':
-              conversionOptions.precision === INCH_RESULT_FORMATS.SIXTEENTHS,
-          },
-          'px-2 mx-2 rounded'
-        )}
-        onClick={() => dispatchInputState({ type: 'toggleInchPrecision' })}
-      >
-        🎯
-      </p>
-    ),
-  },
-  [ConversionType.fromInch]: {
-    // TODO: implement
-    reference: [],
-    fromUnitHeader: 'in',
-    toUnitHeader: 'cm',
-    fromUnitInline: '"',
-    toUnitInline: 'cm',
-    convert: () => {
-      return 1;
-    },
-    OptionsComponent: () => null,
-  },
-};
+export type DispatchInputState = ReturnType<
+  typeof useInputState
+>['dispatchInputState'];
 
 const tableCell = css`
   width: 11ch;
@@ -330,16 +185,17 @@ const tableCell = css`
 `;
 
 const InputTable = ({
-  conversionType,
   convert,
+  conversionType,
   fromValues,
 }: {
   conversionType: ConversionType;
-  convert: (fromValue: number) => string;
-  fromValues: Array<number>;
+  convert: (fromValue: string) => string;
+  fromValues: Array<string>;
 }) => {
   const { fromUnitHeader, toUnitHeader, fromUnitInline, toUnitInline } =
-    ConversionImplemention[conversionType];
+    IMPLEMENTATIONS[conversionType];
+
   return (
     <div className="px-4 flex justify-center">
       <table className="font-mono table-fixed">
@@ -350,7 +206,7 @@ const InputTable = ({
           </tr>
         </thead>
         <tbody>
-          {fromValues.map((from, index: number) => (
+          {fromValues.map((from: string, index: number) => (
             <tr key={index} className="even:bg-gray-800">
               <td css={tableCell}>
                 {from} {fromUnitInline}
@@ -393,15 +249,11 @@ const MetricApp = () => {
   const [currentInput, setCurrentInput] = React.useState<string>('');
 
   const { inputState, dispatchInputState } = useInputState();
-  const { activeConversion, shouldShowEmptyInput } = inputState;
-  if (activeConversion === ConversionType.fromInch) {
-    throw new Error('Not yet implemented');
-  }
-  const conversionHistory = inputState[inputState.activeConversion].history;
-  const conversionOptions = inputState[activeConversion].conversionOptions;
+  const { conversionType, shouldShowEmptyInput } = inputState;
+  const conversionHistory = inputState[inputState.conversionType].history;
 
   const createEntry = React.useCallback(
-    (newValue: number) => {
+    (newValue: string) => {
       dispatchInputState({ type: 'add', payload: newValue });
       setCurrentInput('');
     },
@@ -411,22 +263,63 @@ const MetricApp = () => {
     () => debounce(createEntry, 1500),
     [createEntry]
   );
+  const conversionImplementation = IMPLEMENTATIONS[conversionType];
+  const { fromUnitHeader, toUnitHeader, mobileKeys } = conversionImplementation;
+
+  const convert = (fromValue: string) => {
+    // This looks redundant but is needed for TypeScript.
+    // Without the switch, function arg contravariance causes typescript to take options as an intersection type
+    // Explicitly breaking out the switch cases lets Typescript grab the specific options type for each case
+    switch (conversionType) {
+      case 'fromInch':
+        return IMPLEMENTATIONS[conversionType].convert(
+          fromValue,
+          inputState[conversionType].conversionOptions
+        );
+      case 'fromCm':
+        return IMPLEMENTATIONS[conversionType].convert(
+          fromValue,
+          inputState[conversionType].conversionOptions
+        );
+      default:
+        throw new Error('Convert passed unknown conversion type');
+    }
+  };
+
+  const optionsComponent = (() => {
+    switch (conversionType) {
+      case 'fromInch': {
+        const { OptionsComponent } = IMPLEMENTATIONS[conversionType];
+        return <OptionsComponent />;
+      }
+      case 'fromCm': {
+        const { OptionsComponent } = IMPLEMENTATIONS[conversionType];
+        return (
+          <OptionsComponent
+            conversionOptions={inputState[conversionType].conversionOptions}
+            dispatchInputState={dispatchInputState}
+          />
+        );
+      }
+      default:
+        throw new Error('Convert passed unknown conversion type');
+    }
+  })();
+
   const onCurrentInputChange = React.useCallback(
     (inputStr: string) => {
-      const handle =
-        ConversionImplemention[activeConversion].handleNewInput(inputStr);
+      const handle = conversionImplementation.handleNewInput(inputStr);
       if (handle === 'prevent') {
         return;
       }
-      const parsedInput =
-        ConversionImplemention[activeConversion].parseInput(inputStr);
+      const parsedInput = conversionImplementation.parseInput(inputStr);
       setCurrentInput(inputStr);
       debouncedCreateEntry(parsedInput);
       if (handle === 'flush') {
         debouncedCreateEntry.flush();
       }
     },
-    [debouncedCreateEntry, activeConversion]
+    [debouncedCreateEntry, conversionImplementation]
   );
 
   const isTouchDevice = useIsTouchDevice();
@@ -438,8 +331,6 @@ const MetricApp = () => {
   const firstLoadBlankDisplay = (
     <span className="underline whitespace-pre">{'   '}</span>
   );
-  const OptionsComponent =
-    ConversionImplemention[activeConversion].OptionsComponent;
 
   const resultsDisplay = (
     <div className="flex font-mono py-4 text-xl">
@@ -448,7 +339,7 @@ const MetricApp = () => {
         onClick={() => {
           setCurrentInput('');
           debouncedCreateEntry.flush();
-          // TODO: actually toggle
+          dispatchInputState({ type: 'toggleUnits' });
         }}
       >
         🔀
@@ -465,25 +356,17 @@ const MetricApp = () => {
         >
           {latestInput || firstLoadBlankDisplay}
         </span>
-        cm
+        {fromUnitHeader}
       </p>
       <p className="flex-1">
         <span className="text-blue-300 px-px">
           {!latestInput
             ? firstLoadBlankDisplay
-            : ConversionImplemention[activeConversion].convert(
-                ConversionImplemention[activeConversion].parseInput(
-                  latestInput
-                ),
-                conversionOptions
-              )}
+            : convert(conversionImplementation.parseInput(latestInput))}
         </span>
-        in
+        {toUnitHeader}
       </p>
-      <OptionsComponent
-        conversionOptions={conversionOptions}
-        dispatchInputState={dispatchInputState}
-      />
+      {optionsComponent}
     </div>
   );
 
@@ -536,7 +419,7 @@ const MetricApp = () => {
               }
             `}
           >
-            <form autoComplete="off">
+            <form autoComplete="off" onSubmit={(e) => e.preventDefault()}>
               <div>
                 <input
                   className="px-2 border-4 border-purple-100 border-solid text-lg container bg-transparent"
@@ -547,9 +430,9 @@ const MetricApp = () => {
                   ref={textInput}
                   onChange={(e) => {
                     onCurrentInputChange(
-                      ConversionImplemention[
-                        activeConversion
-                      ].sanitizeKeyboardInput(e.target.value)
+                      conversionImplementation.sanitizeKeyboardInput(
+                        e.target.value
+                      )
                     );
                   }}
                   value={currentInput === 'NaN' ? '' : currentInput}
@@ -566,27 +449,17 @@ const MetricApp = () => {
                 </h3>
                 <InputTable
                   fromValues={conversionHistory}
-                  conversionType={activeConversion}
-                  convert={(from: number) =>
-                    ConversionImplemention[activeConversion].convert(
-                      from,
-                      conversionOptions
-                    )
-                  }
+                  conversionType={conversionType}
+                  convert={convert}
                 />
               </div>
             )}
             <div className="p-2 w-full mt-12 sm:mt-0 sm:w-1/2" key="reference">
               <h3 className="text-2xl sm:text-center">Reference</h3>
               <InputTable
-                fromValues={ConversionImplemention[activeConversion].reference}
-                conversionType={activeConversion}
-                convert={(from: number) =>
-                  ConversionImplemention[activeConversion].convert(
-                    from,
-                    conversionOptions
-                  )
-                }
+                fromValues={conversionImplementation.reference}
+                conversionType={conversionType}
+                convert={convert}
               />
             </div>
           </div>
@@ -607,7 +480,7 @@ const MetricApp = () => {
             </div>
             <div className="h-full select-none py-4 px-3">
               <div className="grid grid-cols-3 grid-rows-4 h-full gap-2">
-                {MOBILE_KEYS[activeConversion].map((key: string) => (
+                {mobileKeys.map((key: string) => (
                   <MobileKey
                     key={key}
                     value={key}
