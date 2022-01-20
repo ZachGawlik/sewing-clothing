@@ -77,7 +77,6 @@ const fromCmImplementation = {
   parseInput: (cmString: string) => (cmString === '.' ? '0' : cmString),
   handleNewInput: (cmString: string) => {
     if (
-      cmString.length === 0 ||
       cmString.match(/\d{4}/) || // prevent pasting in 1234. It's already impossible type this from below rules
       (cmString[0] === '.' && cmString[2] === '.') || // prevent .1.
       (cmString.length >= 2 &&
@@ -147,10 +146,11 @@ const fromInchImplementation = {
     //       and in a way that could maybe reuse some of this logic that needs to exist for desktop input
     if (
       [' ', '/'].includes(inchString) ||
+      inchString.match(/[^\d \/]/) ||
       inchString.match(/\s.*\s/) || // "1 1 "
       inchString.match(/\s\//) || // "1 /"
-      inchString.match(/\/\s/) || // "1/ "
-      inchString.match(/\/0+$/) // "1/0 "
+      inchString.match(/\/0/) || // "1/0 "
+      inchString.match(/\/.*([^\d])/) // "1/ " "1//" "1/1 "
     ) {
       return 'prevent';
     }
@@ -166,20 +166,25 @@ const fromInchImplementation = {
     return 'debounce';
   },
   sanitizeKeyboardInput: (strInput: string) => {
-    // Hmm... how to handle input like 7/1 on the way to typing 7/16
-    // can i just not let debounce save it as "7"?
-    // like... do i really need to support 1 1/15?
-    // Oh wait but i definitely need to support normal typing for desktop keyboard.
-    // so at minimum I need to do that work. And making mobile input nicer would be extra
-    return strInput;
+    return strInput.replaceAll(/[^\d \/]/g, '');
   },
   convert: (
-    fromValue: string,
+    inchInput: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     conversionOptions: InputState[ConversionType.fromInch]['conversionOptions']
   ) => {
-    // TODO: actually handle fraction inputs and whole+fraction
-    return `${+fromValue * INCH_TO_CM_RATIO}`;
+    const fromValue = inchInput.trim();
+    if (fromValue.match(/^\d*$/)) {
+      return (+fromValue * INCH_TO_CM_RATIO).toFixed(1);
+    }
+    const [whole, fraction] = fromValue.includes(' ')
+      ? fromValue.split(' ')
+      : [0, fromValue];
+    const [num, den] = fraction.split('/');
+
+    return ((+whole + +num / (+den || 1)) * INCH_TO_CM_RATIO).toFixed(
+      whole ? 1 : 2
+    );
   },
   OptionsComponent: () => null,
 };

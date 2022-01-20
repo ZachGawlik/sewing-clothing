@@ -35,7 +35,6 @@ describe('MetricApp', () => {
   describe('handleNewInput', () => {
     test('fromCm', () => {
       const { handleNewInput } = IMPLEMENTATIONS[ConversionType.fromCm];
-      expect(handleNewInput('')).toEqual('prevent');
       expect(handleNewInput('1234')).toEqual('prevent');
       expect(handleNewInput('.1.')).toEqual('prevent');
       expect(handleNewInput('2..')).toEqual('prevent');
@@ -60,7 +59,10 @@ describe('MetricApp', () => {
       expect(handleNewInput('1 1 ')).toEqual('prevent');
       expect(handleNewInput('1 /')).toEqual('prevent');
       expect(handleNewInput('1 5/ ')).toEqual('prevent');
+      expect(handleNewInput('1 5//')).toEqual('prevent');
+      expect(handleNewInput('1/2/')).toEqual('prevent');
       expect(handleNewInput('1/0')).toEqual('prevent');
+      expect(handleNewInput('1/1 ')).toEqual('prevent');
 
       expect(handleNewInput('1/2')).toEqual('flush');
       expect(handleNewInput('1/7')).toEqual('flush'); // prevent two-digit denominators even for nonstandard single-digit denominators
