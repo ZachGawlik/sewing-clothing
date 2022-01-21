@@ -26,6 +26,7 @@ const useIsTouchDevice = () => {
   return isTouchDevice;
 };
 
+const maxMobileKeyboardHeight = '350px';
 const mobileKeyDuration = 200;
 const MobileKey = ({
   value,
@@ -406,7 +407,10 @@ const MetricApp = () => {
           className="overflow-y-scroll"
           css={css`
             @media (pointer: coarse) {
-              height: 45%;
+              height: max(
+                50%,
+                calc(var(--app-height) - ${maxMobileKeyboardHeight})
+              );
             }
           `}
         >
@@ -490,7 +494,8 @@ const MetricApp = () => {
           <div
             className="shrink-0 bg-black flex flex-col touch-none"
             css={css`
-              height: 55%;
+              height: 50%;
+              max-height: ${maxMobileKeyboardHeight};
               padding-bottom: env(safe-area-inset-bottom, 50px);
 
               z-index: 1; /* must be set for shadow to display */
