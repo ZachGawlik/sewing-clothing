@@ -11,6 +11,11 @@ export enum ConversionType {
   fromCm = 'fromCm',
 }
 
+export enum UnitHeader {
+  cm = 'cm',
+  in = 'in',
+}
+
 const INCH_TO_CM_RATIO = 2.54;
 
 /* ========================= fromCm ======================================== */
@@ -58,9 +63,9 @@ export const decimalToFractionStr = (
 };
 const fromCmImplementation = {
   reference: ['0.5', '1', '2', '3', '4', '5', '6', '10'],
-  fromUnitHeader: 'cm',
-  toUnitHeader: 'in',
   fromUnitInline: 'cm',
+  fromUnitHeader: UnitHeader.cm,
+  toUnitHeader: UnitHeader.in,
   toUnitInline: '"',
   mobileKeys: [
     ['1', '2', '3'],
@@ -137,8 +142,8 @@ const toFixed = (num: number, precision: number) => {
 
 const fromInchImplementation = {
   reference: ['1/4', '3/8', '1/2', '5/8', '1', '2', '5', '10'],
-  fromUnitHeader: 'in',
-  toUnitHeader: 'cm',
+  fromUnitHeader: UnitHeader.in,
+  toUnitHeader: UnitHeader.cm,
   fromUnitInline: '"',
   toUnitInline: 'cm',
   mobileKeys: [
@@ -196,6 +201,11 @@ const fromInchImplementation = {
     );
   },
   OptionsComponent: () => null,
+};
+
+export const HEADER_TO_COLOR = {
+  in: '#fda4af', // text-red-300
+  cm: '#d8b4fe', // text-purple-300
 };
 
 export const IMPLEMENTATIONS = {

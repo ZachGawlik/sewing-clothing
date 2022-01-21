@@ -7,6 +7,7 @@ import immer from 'immer';
 import { useAppHeight } from 'utils/hooks';
 import {
   ConversionType,
+  HEADER_TO_COLOR,
   IMPLEMENTATIONS,
   INCH_RESULT_FORMATS,
 } from './constants';
@@ -356,23 +357,24 @@ const MetricApp = () => {
       </p>
       <div className="flex-1 w-24">
         <span
-          css={
-            currentInput === '' &&
-            css`
-              background-color: hsla(255, 0%, 100%, 0.2);
-            `
-          }
-          className="text-pink-300 inline-block text-right px-px whitespace-pre"
+          css={css`
+            background-color: ${currentInput === ''
+              ? 'hsla(255, 0%, 100%, 0.2)'
+              : ''};
+            color: ${HEADER_TO_COLOR[fromUnitHeader]};
+          `}
+          className={`inline-block text-right px-px whitespace-pre`}
         >
           {latestInput || firstLoadBlankDisplay}
         </span>
         {/* Safari bugs out animating opacity for inline elements */}
         {currentInput && (
           <span
-            className="h-full w-px inline-block align-bottom background-orange"
+            className="h-full w-px inline-block align-bottom"
             key={latestInput /* effectively debounces animation */}
             css={css`
-              background-color: hsl(336, 69%, 60.4%);
+              background-color: ${HEADER_TO_COLOR[fromUnitHeader]};
+              filter: hue-rotate(45deg);
               animation: ${blink} ease-in-out 0.6s infinite;
               animation-direction: alternate;
               animation-delay: 0.3s;
@@ -382,7 +384,12 @@ const MetricApp = () => {
         {fromUnitHeader}
       </div>
       <p className="flex-1">
-        <span className="text-blue-300 px-px">
+        <span
+          className="px-px"
+          css={css`
+            color: ${HEADER_TO_COLOR[toUnitHeader]};
+          `}
+        >
           {!latestInput
             ? firstLoadBlankDisplay
             : convert(conversionImplementation.parseInput(latestInput))}
