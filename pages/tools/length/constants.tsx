@@ -127,6 +127,14 @@ const fromCmImplementation = {
     </p>
   ),
 };
+
+/* ========================= fromInch ======================================== */
+const toFixed = (num: number, precision: number) => {
+  // .toFixed() does rounding. e.g. 5.995 will return "6"
+  const fixed = num.toFixed(precision);
+  return +fixed === Math.round(+fixed) ? `${Math.round(+fixed)}` : fixed;
+};
+
 const fromInchImplementation = {
   reference: ['1/4', '3/8', '1/2', '5/8', '1', '2', '5', '10'],
   fromUnitHeader: 'in',
@@ -175,14 +183,15 @@ const fromInchImplementation = {
   ) => {
     const fromValue = inchInput.trim();
     if (fromValue.match(/^\d*$/)) {
-      return (+fromValue * INCH_TO_CM_RATIO).toFixed(1);
+      return toFixed(+fromValue * INCH_TO_CM_RATIO, 1);
     }
     const [whole, fraction] = fromValue.includes(' ')
       ? fromValue.split(' ')
       : [0, fromValue];
     const [num, den] = fraction.split('/');
 
-    return ((+whole + +num / (+den || 1)) * INCH_TO_CM_RATIO).toFixed(
+    return toFixed(
+      (+whole + +num / (+den || 1)) * INCH_TO_CM_RATIO,
       whole ? 1 : 2
     );
   },
