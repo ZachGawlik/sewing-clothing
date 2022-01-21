@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import Link from 'next/link';
 import debounce from 'lodash/debounce';
 import immer from 'immer';
@@ -223,6 +223,15 @@ const InputTable = ({
   );
 };
 
+const blink = keyframes`
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+`;
+
 const MetricApp = () => {
   useAppHeight();
 
@@ -344,20 +353,33 @@ const MetricApp = () => {
       >
         🔀
       </p>
-      <p className="flex-1 w-24">
+      <div className="flex-1 w-24">
         <span
           css={
             currentInput === '' &&
             css`
-              background-color: hsl(336, 69%, 20.4%);
+              background-color: hsla(255, 0%, 100%, 0.2);
             `
           }
-          className="text-pink-300 inline-block text-right px-px"
+          className="text-pink-300 inline-block text-right px-px whitespace-pre"
         >
           {latestInput || firstLoadBlankDisplay}
         </span>
+        {/* Safari bugs out animating opacity for inline elements */}
+        {currentInput && (
+          <span
+            className="h-full w-px inline-block align-bottom background-orange"
+            key={latestInput /* effectively debounces animation */}
+            css={css`
+              background-color: hsl(336, 69%, 60.4%);
+              animation: ${blink} ease-in-out 0.6s infinite;
+              animation-direction: alternate;
+              animation-delay: 0.3s;
+            `}
+          />
+        )}
         {fromUnitHeader}
-      </p>
+      </div>
       <p className="flex-1">
         <span className="text-blue-300 px-px">
           {!latestInput
