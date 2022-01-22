@@ -159,7 +159,9 @@ const fromInchImplementation = {
     //       and in a way that could maybe reuse some of this logic that needs to exist for desktop input
     if (
       [' ', '/'].includes(inchString) ||
-      inchString.match(/[^\d \/]/) ||
+      inchString.match(/[^\d \/\.]/) ||
+      inchString.match(/[^\d]\./) || // "1 ."
+      inchString.match(/\..*[^\d]/) || // "1. "
       inchString.match(/\s.*\s/) || // "1 1 "
       inchString.match(/\s\//) || // "1 /"
       inchString.match(/\/0/) || // "1/0 "
@@ -169,8 +171,9 @@ const fromInchImplementation = {
     }
 
     if (
-      inchString.match(/.*\/[2-9]$/) ||
-      inchString.match(/.*\/1[0-9]$/) ||
+      inchString.match(/.*\/[2-9]/) ||
+      inchString.match(/.*\/1[0-9]/) ||
+      inchString.match(/\.\d\d/) || // 1.52
       inchString.match(/\d\d\d+/)
     ) {
       return 'flush';
@@ -179,7 +182,7 @@ const fromInchImplementation = {
     return 'debounce';
   },
   sanitizeKeyboardInput: (strInput: string) => {
-    return strInput.replaceAll(/[^\d \/]/g, '');
+    return strInput.replaceAll(/[^\d \/\.]/g, '');
   },
   convert: (
     inchInput: string,
@@ -194,11 +197,9 @@ const fromInchImplementation = {
       ? fromValue.split(' ')
       : [0, fromValue];
     const [num, den] = fraction.split('/');
-
-    return toFixed(
-      (+whole + +num / (+den || 1)) * INCH_TO_CM_RATIO,
-      whole ? 1 : 2
-    );
+    const inch = +whole + +num / (+den || 1);
+    const cm = inch * INCH_TO_CM_RATIO;
+    return toFixed(cm, cm < 1 ? 2 : 1);
   },
   OptionsComponent: () => null,
 };

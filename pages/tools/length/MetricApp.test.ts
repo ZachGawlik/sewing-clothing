@@ -75,6 +75,12 @@ describe('MetricApp', () => {
       expect(handleNewInput('5/1')).toEqual('debounce'); // typing 5/16. /1 is the only allowed start for a two-digit denominator
       expect(handleNewInput('25/')).toEqual('debounce');
       expect(handleNewInput('1 25/1')).toEqual('debounce'); // a silly input, but forcing a larger denominator would be awk
+
+      // decimals can be more convenient for desktop
+      expect(handleNewInput('1 .')).toEqual('prevent');
+      expect(handleNewInput('1.')).toEqual('debounce');
+      expect(handleNewInput('1.5')).toEqual('debounce');
+      expect(handleNewInput('1.52')).toEqual('flush');
     });
   });
 });
