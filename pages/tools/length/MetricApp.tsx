@@ -186,6 +186,8 @@ const tableCell = css`
   padding: 0.5ch;
 `;
 
+const MOBILE_KEY_MAX_WIDTH = '450px';
+
 const InputTable = ({
   convert,
   conversionType,
@@ -344,9 +346,18 @@ const MetricApp = () => {
   );
 
   const resultsDisplay = (
-    <div className="flex font-mono py-4 text-xl">
+    <div
+      className="font-mono text-xl items-center"
+      css={css`
+        display: grid;
+        grid-template-columns: 50px auto 50px;
+        @media (min-width: 640px) {
+          grid-template-columns: 1fr ${MOBILE_KEY_MAX_WIDTH} 1fr;
+        } ;
+      `}
+    >
       <p
-        className="px-4"
+        className="p-4"
         onClick={() => {
           setCurrentInput('');
           debouncedCreateEntry.flush();
@@ -355,48 +366,52 @@ const MetricApp = () => {
       >
         🔀
       </p>
-      <div className="flex-1 w-24">
-        <span
-          css={css`
-            background-color: ${currentInput === ''
-              ? 'hsla(255, 0%, 100%, 0.2)'
-              : ''};
-            color: ${HEADER_TO_COLOR[fromUnitHeader]};
-          `}
-          className={`inline-block text-right px-px whitespace-pre`}
-        >
-          {latestInput || firstLoadBlankDisplay}
-        </span>
-        {/* Safari bugs out animating opacity for inline elements */}
-        {currentInput && (
+      <div className="flex">
+        <div className="flex-1 w-24 sm:w-1/2">
           <span
-            className="h-full w-px inline-block align-bottom"
-            key={latestInput /* effectively debounces animation */}
             css={css`
-              background-color: ${HEADER_TO_COLOR[fromUnitHeader]};
-              filter: hue-rotate(45deg);
-              animation: ${blink} ease-in-out 0.6s infinite;
-              animation-direction: alternate;
-              animation-delay: 0.3s;
+              background-color: ${currentInput === ''
+                ? 'hsla(255, 0%, 100%, 0.2)'
+                : ''};
+              color: ${HEADER_TO_COLOR[fromUnitHeader]};
             `}
-          />
-        )}
-        {fromUnitHeader}
+            className={`inline-block text-right px-px whitespace-pre`}
+          >
+            {latestInput || firstLoadBlankDisplay}
+          </span>
+          {/* Safari bugs out animating opacity for inline elements */}
+          {currentInput && (
+            <span
+              className="h-full w-px inline-block align-bottom"
+              key={latestInput /* effectively debounces animation */}
+              css={css`
+                background-color: ${HEADER_TO_COLOR[fromUnitHeader]};
+                filter: hue-rotate(45deg);
+                animation: ${blink} ease-in-out 0.6s infinite;
+                animation-direction: alternate;
+                animation-delay: 0.3s;
+              `}
+            />
+          )}
+          {fromUnitHeader}
+        </div>
+        <p className="flex-1 sm:w-1/2 text-right">
+          <span
+            className="px-px"
+            css={css`
+              color: ${HEADER_TO_COLOR[toUnitHeader]};
+            `}
+          >
+            {!latestInput
+              ? firstLoadBlankDisplay
+              : convert(conversionImplementation.parseInput(latestInput))}
+          </span>
+          {toUnitHeader}
+        </p>
       </div>
-      <p className="flex-1">
-        <span
-          className="px-px"
-          css={css`
-            color: ${HEADER_TO_COLOR[toUnitHeader]};
-          `}
-        >
-          {!latestInput
-            ? firstLoadBlankDisplay
-            : convert(conversionImplementation.parseInput(latestInput))}
-        </span>
-        {toUnitHeader}
-      </p>
-      {optionsComponent}
+      <div className="flex justify-end">
+        <div>{optionsComponent}</div>
+      </div>
     </div>
   );
 
@@ -421,14 +436,7 @@ const MetricApp = () => {
             }
           `}
         >
-          <div
-            className="px-4"
-            css={css`
-              @media (min-width: 768px) {
-                min-height: 30vh;
-              }
-            `}
-          >
+          <div className="px-4">
             <div className="mb-8">
               <div className="flex place-content-between">
                 <div>
@@ -513,16 +521,23 @@ const MetricApp = () => {
               {resultsDisplay}
             </div>
             <div className="h-full select-none py-4 px-3">
-              <div className="grid grid-cols-3 grid-rows-4 h-full gap-2">
-                {mobileKeys.map((key: string) => (
-                  <MobileKey
-                    key={key}
-                    value={key}
-                    onClick={(newKey: string) => {
-                      onCurrentInputChange(`${currentInput}${newKey}`);
-                    }}
-                  />
-                ))}
+              <div className="flex justify-center align-center h-full">
+                <div
+                  className="grid grid-cols-3 grid-rows-4 h-full w-full gap-2"
+                  css={css`
+                    max-width: ${MOBILE_KEY_MAX_WIDTH};
+                  `}
+                >
+                  {mobileKeys.map((key: string) => (
+                    <MobileKey
+                      key={key}
+                      value={key}
+                      onClick={(newKey: string) => {
+                        onCurrentInputChange(`${currentInput}${newKey}`);
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
