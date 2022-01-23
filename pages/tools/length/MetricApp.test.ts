@@ -35,6 +35,7 @@ describe('MetricApp', () => {
   describe('handleNewInput', () => {
     test('fromCm', () => {
       const { handleNewInput } = IMPLEMENTATIONS[ConversionType.fromCm];
+      expect(handleNewInput('00')).toEqual('prevent');
       expect(handleNewInput('1234')).toEqual('prevent');
       expect(handleNewInput('.1.')).toEqual('prevent');
       expect(handleNewInput('2..')).toEqual('prevent');
@@ -55,6 +56,7 @@ describe('MetricApp', () => {
       const { handleNewInput } = IMPLEMENTATIONS[ConversionType.fromInch];
       expect(handleNewInput(' ')).toEqual('prevent');
       expect(handleNewInput('/')).toEqual('prevent');
+      expect(handleNewInput('00')).toEqual('prevent');
       expect(handleNewInput('1  ')).toEqual('prevent');
       expect(handleNewInput('1 1 ')).toEqual('prevent');
       expect(handleNewInput('1 /')).toEqual('prevent');
@@ -71,6 +73,8 @@ describe('MetricApp', () => {
       expect(handleNewInput('5/16')).toEqual('flush');
       expect(handleNewInput('252')).toEqual('flush');
 
+      expect(handleNewInput('0 ')).toEqual('debounce');
+      expect(handleNewInput('0/')).toEqual('debounce');
       expect(handleNewInput('5 ')).toEqual('debounce');
       expect(handleNewInput('5/1')).toEqual('debounce'); // typing 5/16. /1 is the only allowed start for a two-digit denominator
       expect(handleNewInput('25/')).toEqual('debounce');

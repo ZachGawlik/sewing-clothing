@@ -7,7 +7,7 @@ import immer from 'immer';
 import { useAppHeight } from 'utils/hooks';
 import {
   ConversionType,
-  HEADER_TO_COLOR,
+  INLINE_UNIT_TO_COLOR,
   IMPLEMENTATIONS,
   INCH_RESULT_FORMATS,
 } from './constants';
@@ -213,7 +213,8 @@ const InputTable = ({
           {fromValues.map((from: string, index: number) => (
             <tr key={index} className="even:bg-gray-800">
               <td css={tableCell}>
-                {from} {fromUnitInline}
+                {from}
+                {fromUnitInline}
               </td>
               <td css={tableCell}>
                 {convert(from)}
@@ -277,7 +278,7 @@ const MetricApp = () => {
     [createEntry]
   );
   const conversionImplementation = IMPLEMENTATIONS[conversionType];
-  const { fromUnitHeader, toUnitHeader, mobileKeys } = conversionImplementation;
+  const { fromUnitInline, toUnitInline, mobileKeys } = conversionImplementation;
 
   const convert = (fromValue: string) => {
     // This looks redundant but is needed for TypeScript.
@@ -367,13 +368,13 @@ const MetricApp = () => {
         🔀
       </p>
       <div className="flex">
-        <div className="flex-1 w-24 sm:w-1/2">
+        <div className="flex-1 w-24 sm:w-1/2 whitespace-nowrap">
           <span
             css={css`
               background-color: ${currentInput === ''
                 ? 'hsla(255, 0%, 100%, 0.2)'
                 : ''};
-              color: ${HEADER_TO_COLOR[fromUnitHeader]};
+              color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
             `}
             className={`inline-block text-right px-px whitespace-pre`}
           >
@@ -385,7 +386,7 @@ const MetricApp = () => {
               className="h-full w-px inline-block align-bottom"
               key={latestInput /* effectively debounces animation */}
               css={css`
-                background-color: ${HEADER_TO_COLOR[fromUnitHeader]};
+                background-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
                 filter: hue-rotate(45deg);
                 animation: ${blink} ease-in-out 0.6s infinite;
                 animation-direction: alternate;
@@ -393,20 +394,20 @@ const MetricApp = () => {
               `}
             />
           )}
-          {fromUnitHeader}
+          {fromUnitInline}
         </div>
-        <p className="flex-1 sm:w-1/2 text-right">
+        <p className="flex-1 sm:w-1/2 whitespace-nowrap text-right">
           <span
             className="px-px"
             css={css`
-              color: ${HEADER_TO_COLOR[toUnitHeader]};
+              color: ${INLINE_UNIT_TO_COLOR[toUnitInline]};
             `}
           >
             {!latestInput
               ? firstLoadBlankDisplay
               : convert(conversionImplementation.parseInput(latestInput))}
           </span>
-          {toUnitHeader}
+          {toUnitInline}
         </p>
       </div>
       <div className="flex justify-end">

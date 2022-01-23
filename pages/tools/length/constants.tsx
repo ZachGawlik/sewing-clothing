@@ -11,9 +11,9 @@ export enum ConversionType {
   fromCm = 'fromCm',
 }
 
-export enum UnitHeader {
+export enum InlineUnit {
   cm = 'cm',
-  in = 'in',
+  '"' = '"',
 }
 
 const INCH_TO_CM_RATIO = 2.54;
@@ -62,11 +62,11 @@ export const decimalToFractionStr = (
   return `${whole} ${numerator}/${denominator}`;
 };
 const fromCmImplementation = {
-  reference: ['0.5', '1', '2', '3', '4', '5', '6', '10'],
-  fromUnitInline: 'cm',
-  fromUnitHeader: UnitHeader.cm,
-  toUnitHeader: UnitHeader.in,
-  toUnitInline: '"',
+  reference: ['0.5', '1', '1.5', '2', '2.5', '3', '4', '5', '30', '100'],
+  fromUnitInline: InlineUnit['cm'],
+  fromUnitHeader: 'cm',
+  toUnitHeader: 'in',
+  toUnitInline: InlineUnit['"'],
   mobileKeys: [
     ['1', '2', '3'],
     ['4', '5', '6'],
@@ -84,6 +84,7 @@ const fromCmImplementation = {
     if (
       cmString.match(/\d{4}/) || // prevent pasting in 1234. It's already impossible type this from below rules
       (cmString[0] === '.' && cmString[2] === '.') || // prevent .1.
+      cmString.match(/^00/) ||
       (cmString.length >= 2 &&
         cmString[cmString.length - 2] === '.' &&
         cmString[cmString.length - 1] === '.') // prevent 2..
@@ -141,11 +142,11 @@ const toFixed = (num: number, precision: number) => {
 };
 
 const fromInchImplementation = {
-  reference: ['1/4', '3/8', '1/2', '5/8', '1', '2', '5', '10'],
-  fromUnitHeader: UnitHeader.in,
-  toUnitHeader: UnitHeader.cm,
-  fromUnitInline: '"',
-  toUnitInline: 'cm',
+  reference: ['1/8', '1/4', '3/8', '1/2', '5/8', '1', '1 1/2', '2', '5', '36'],
+  fromUnitHeader: 'in',
+  toUnitHeader: 'cm',
+  fromUnitInline: InlineUnit['"'],
+  toUnitInline: InlineUnit['cm'],
   mobileKeys: [
     ['1', '2', '3'],
     ['4', '5', '6'],
@@ -159,6 +160,7 @@ const fromInchImplementation = {
     //       and in a way that could maybe reuse some of this logic that needs to exist for desktop input
     if (
       [' ', '/'].includes(inchString) ||
+      inchString.match(/^00/) ||
       inchString.match(/[^\d \/\.]/) ||
       inchString.match(/[^\d]\./) || // "1 ."
       inchString.match(/\..*[^\d]/) || // "1. "
@@ -190,23 +192,25 @@ const fromInchImplementation = {
     conversionOptions: InputState[ConversionType.fromInch]['conversionOptions']
   ) => {
     const fromValue = inchInput.trim();
+    let inch;
     if (fromValue.match(/^\d*$/)) {
-      return toFixed(+fromValue * INCH_TO_CM_RATIO, 1);
+      inch = +fromValue;
+    } else {
+      const [whole, fraction] = fromValue.includes(' ')
+        ? fromValue.split(' ')
+        : [0, fromValue];
+      const [num, den] = fraction.split('/');
+      inch = +whole + +num / (+den || 1);
     }
-    const [whole, fraction] = fromValue.includes(' ')
-      ? fromValue.split(' ')
-      : [0, fromValue];
-    const [num, den] = fraction.split('/');
-    const inch = +whole + +num / (+den || 1);
     const cm = inch * INCH_TO_CM_RATIO;
-    return toFixed(cm, cm < 1 ? 2 : 1);
+    return cm > 100 ? `${Math.round(cm)}` : toFixed(cm, cm < 1 ? 2 : 1);
   },
   OptionsComponent: () => null,
 };
 
-export const HEADER_TO_COLOR = {
-  in: '#fda4af', // text-red-300
-  cm: '#d8b4fe', // text-purple-300
+export const INLINE_UNIT_TO_COLOR = {
+  [InlineUnit['"']]: '#fda4af', // text-red-300
+  [InlineUnit['cm']]: '#d8b4fe', // text-purple-300
 };
 
 export const IMPLEMENTATIONS = {
