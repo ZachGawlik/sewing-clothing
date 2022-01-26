@@ -1,51 +1,58 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from '../styles/Home.module.css';
+import imgUnderConstruction from '../public/under-construction-1.png';
 
 /* eslint-disable @next/next/no-img-element */
 const Home: NextPage = () => {
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} bg-gray-900 text-white`}>
       <Head>
         <title>sewing.clothing</title>
         <meta name="description" content="Sewing clothing - tools & thoughts" />
       </Head>
 
-      <main className={`{styles.main}`}>
+      <main className={styles.main}>
         <h1 className="font-mono text-4xl text-center">sewing.clothing</h1>
-
-        <p className="py-2">
-          At some point this will have little web apps and maybe helpful
-          resources for sewing clothing.
-        </p>
-        <div className="prose">
-          <p>For now, this site is</p>
+        <div className="prose prose-invert prose-a:text-slate-100">
           <div>
-            <img
+            <Image
               className="container mx-auto"
-              src="/under-construction-1.gif"
+              src={imgUnderConstruction}
               alt="Under construction"
             />{' '}
           </div>
-
-          <p>Other pages:</p>
-          <ul>
-            <li>
-              <Link href="/tools">
-                <a>/tools</a>
-              </Link>
-            </li>
-            <li>
-              <Link href="/resources">
-                <a>/resources</a>
-              </Link>
-            </li>
-          </ul>
+          <p>
+            <Link href="/start">
+              <a>🏁 Getting started with sewing clothing</a>
+            </Link>
+          </p>
+          <p>
+            <Link href="/tools/length">
+              <a className="text-blue-400">
+                📐 Length conversion. cm {'<->'} inch
+              </a>
+            </Link>
+          </p>
+          <p>
+            <Link href="/references">
+              <a>🔎 Resources</a>
+            </Link>
+          </p>
+        </div>
+        <div className="mt-16 text-center">
+          <p>
+            <img src="/under-construction-2.gif" alt="" className="inline" />{' '}
+            This site is under active construction{' '}
+            <img src="/under-construction-2.gif" alt="" className="inline" />
+          </p>
         </div>
       </main>
     </div>
   );
 };
+/* eslint-enable @next/next/no-img-element */
 
 export default Home;

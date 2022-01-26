@@ -28,26 +28,9 @@ const ToolsPage: NextPage = () => {
                   </a>
                 </Link>
               </li>
+              <li>GSM / Oz converter and reference</li>
               <li>circle skirt calculator</li>
               <li>bias strip calculator</li>
-              <li>
-                Gutermann thread retail vs wholesale lookup. And
-                colorblind-friendly color names
-              </li>
-              <li>GSM / Oz converter and reference</li>
-            </ul>
-          </section>
-          <section>
-            <p>More static resources</p>
-            <ul className="space-y-2 list-disc list-inside">
-              <li>Gutermann Mara x Needle size reference</li>
-              <li>
-                <Link href="/tools/needles">
-                  <a className="text-blue-400">
-                    Dritz / Schmetz / Organ needle identification
-                  </a>
-                </Link>
-              </li>
             </ul>
           </section>
         </div>

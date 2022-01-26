@@ -1,5 +1,8 @@
 /home /
 /tool /tools
-/resources /tools
+/resources /references
+/reference /references
 /tools/imperial /tools/length
 /tools/metric /tools/length
+/tools /
+/getting-started /start
