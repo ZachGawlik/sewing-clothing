@@ -247,12 +247,9 @@ const MetricApp = () => {
 
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      // Prevents clobbering keyboard shortcuts like cmd+c or hitting Tab
-      if (e.key.match(/(\d\.)/)) {
+      if (e.key.match(/[\d\.]/)) {
         textInput.current?.focus();
       }
-      // TODO: potentially have it update state even for mobile
-      // could be handy in weird cases of ipad-with-keyboard or windows hybrids
     };
     document.addEventListener('keydown', onKeyDown);
     return () => {
@@ -341,6 +338,11 @@ const MetricApp = () => {
   const latestInput =
     currentInput ||
     (shouldShowEmptyInput ? null : conversionHistory[0]?.toString());
+  React.useEffect(() => {
+    if (currentInput === '') {
+      textInput.current?.select();
+    }
+  }, [currentInput]);
 
   const firstLoadBlankDisplay = (
     <span className="underline whitespace-pre">{'   '}</span>
@@ -369,6 +371,36 @@ const MetricApp = () => {
       </p>
       <div className="flex">
         <div className="flex-1 w-24 sm:w-1/2 whitespace-nowrap">
+          {!isTouchDevice && (
+            <form
+              autoComplete="off"
+              onSubmit={(e) => {
+                debouncedCreateEntry.flush();
+                e.preventDefault();
+              }}
+            >
+              <div>
+                <input
+                  className="px-2 text-lg text-mono container bg-transparent shadow-none ring-0 border-0 outline-none"
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  autoFocus={true}
+                  ref={textInput}
+                  onChange={(e) => {
+                    onCurrentInputChange(
+                      conversionImplementation.sanitizeKeyboardInput(
+                        e.target.value
+                      )
+                    );
+                  }}
+                  value={
+                    latestInput === 'NaN' || !latestInput ? '' : latestInput
+                  }
+                />
+              </div>
+            </form>
+          )}
           <span
             css={css`
               background-color: ${currentInput === ''
@@ -380,21 +412,25 @@ const MetricApp = () => {
           >
             {latestInput || firstLoadBlankDisplay}
           </span>
-          {/* Safari bugs out animating opacity for inline elements */}
-          {currentInput && (
-            <span
-              className="h-full w-px inline-block align-bottom"
-              key={latestInput /* effectively debounces animation */}
-              css={css`
-                background-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
-                filter: hue-rotate(45deg);
-                animation: ${blink} ease-in-out 0.6s infinite;
-                animation-direction: alternate;
-                animation-delay: 0.3s;
-              `}
-            />
+          {isTouchDevice && (
+            <>
+              {/* inline-block is necessary for animating opacity for iOS Safari */}
+              {currentInput && (
+                <span
+                  className="h-full w-px inline-block align-bottom"
+                  key={latestInput /* effectively debounces animation */}
+                  css={css`
+                    background-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
+                    filter: hue-rotate(45deg);
+                    animation: ${blink} ease-in-out 0.6s infinite;
+                    animation-direction: alternate;
+                    animation-delay: 0.3s;
+                  `}
+                />
+              )}
+              {fromUnitInline}
+            </>
           )}
-          {fromUnitInline}
         </div>
         <p className="flex-1 sm:w-1/2 whitespace-nowrap text-right">
           <span
@@ -445,11 +481,6 @@ const MetricApp = () => {
                     <a className="text-blue-400 font-mono">sewing.clothing</a>
                   </Link>
                 </div>
-                <div>
-                  <Link href="/tools">
-                    <a className="text-blue-400 font-mono">/tools</a>
-                  </Link>
-                </div>
               </div>
               <h1 className="text-2xl text-center">Length converter</h1>
             </div>
@@ -461,26 +492,6 @@ const MetricApp = () => {
               }
             `}
           >
-            <form autoComplete="off" onSubmit={(e) => e.preventDefault()}>
-              <div>
-                <input
-                  className="px-2 border-4 border-purple-100 border-solid text-lg container bg-transparent"
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  autoFocus={true}
-                  ref={textInput}
-                  onChange={(e) => {
-                    onCurrentInputChange(
-                      conversionImplementation.sanitizeKeyboardInput(
-                        e.target.value
-                      )
-                    );
-                  }}
-                  value={currentInput === 'NaN' ? '' : currentInput}
-                />
-              </div>
-            </form>
             {resultsDisplay}
           </div>
           <div className="flex flex-wrap">

@@ -153,7 +153,7 @@ const fromInchImplementation = {
     ['7', '8', '9'],
     [' ', '0', '/'],
   ].flat(),
-  parseInput: (inchString: string) => inchString, // TODO:
+  parseInput: (cmString: string) => (cmString === '.' ? '0' : cmString),
   handleNewInput: (inchString: string) => {
     // TODO: At some point will  want to translate some of these "can't add space next" "can't add slash next"
     //       as legit disabling the mobile key input button. Not sure how to do that in a way that isn't distracting
@@ -167,7 +167,9 @@ const fromInchImplementation = {
       inchString.match(/\s.*\s/) || // "1 1 "
       inchString.match(/\s\//) || // "1 /"
       inchString.match(/\/0/) || // "1/0 "
-      inchString.match(/\/.*([^\d])/) // "1/ " "1//" "1/1 "
+      inchString.match(/\/.*([^\d])/) || // "1/ " "1//" "1/1 "
+      inchString.match(/\d{4}/) ||
+      inchString.match(/\d{3} /)
     ) {
       return 'prevent';
     }

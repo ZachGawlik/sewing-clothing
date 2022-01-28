@@ -12,5 +12,6 @@ module.exports = {
     'no-unused-vars': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
+    '@next/next/no-img-element': 'off',
   },
 };
