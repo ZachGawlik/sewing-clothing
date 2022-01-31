@@ -189,10 +189,12 @@ const tableCell = css`
 const MOBILE_KEY_MAX_WIDTH = '450px';
 
 const InputTable = ({
+  className,
   convert,
   conversionType,
   fromValues,
 }: {
+  className?: string;
   conversionType: ConversionType;
   convert: (fromValue: string) => string;
   fromValues: Array<string>;
@@ -201,7 +203,7 @@ const InputTable = ({
     IMPLEMENTATIONS[conversionType];
 
   return (
-    <div className="px-4 flex justify-center">
+    <div className={cx(className, 'flex')}>
       <table className="font-mono table-fixed">
         <thead>
           <tr>
@@ -263,12 +265,17 @@ const MetricApp = () => {
   const { conversionType, shouldShowEmptyInput } = inputState;
   const conversionHistory = inputState[inputState.conversionType].history;
 
+  const isTouchDevice = useIsTouchDevice();
+
   const createEntry = React.useCallback(
     (newValue: string) => {
       dispatchInputState({ type: 'add', payload: newValue });
-      setCurrentInput('');
+      if (isTouchDevice) {
+        setCurrentInput('');
+      }
+      textInput.current?.select();
     },
-    [dispatchInputState]
+    [dispatchInputState, isTouchDevice]
   );
   const debouncedCreateEntry = React.useMemo(
     () => debounce(createEntry, 1500),
@@ -319,6 +326,12 @@ const MetricApp = () => {
 
   const onCurrentInputChange = React.useCallback(
     (inputStr: string) => {
+      if (inputStr === '') {
+        // only possible when backspacing on desktop input
+        debouncedCreateEntry.cancel();
+        setCurrentInput(inputStr);
+        return;
+      }
       const handle = conversionImplementation.handleNewInput(inputStr);
       if (handle === 'prevent') {
         return;
@@ -333,16 +346,10 @@ const MetricApp = () => {
     [debouncedCreateEntry, conversionImplementation]
   );
 
-  const isTouchDevice = useIsTouchDevice();
-
+  // latestInput concept only exists for mobile. Otherwise input doesn't get cleared for desktop
   const latestInput =
     currentInput ||
     (shouldShowEmptyInput ? null : conversionHistory[0]?.toString());
-  React.useEffect(() => {
-    if (currentInput === '') {
-      textInput.current?.select();
-    }
-  }, [currentInput]);
 
   const firstLoadBlankDisplay = (
     <span className="underline whitespace-pre">{'   '}</span>
@@ -350,104 +357,135 @@ const MetricApp = () => {
 
   const resultsDisplay = (
     <div
-      className="font-mono text-xl items-center"
       css={css`
-        display: grid;
-        grid-template-columns: 50px auto 50px;
-        @media (min-width: 640px) {
-          grid-template-columns: 1fr ${MOBILE_KEY_MAX_WIDTH} 1fr;
-        } ;
+        @media (min-width: 768px) and (pointer: fine) {
+          margin: 0 auto;
+          width: 680px;
+        }
       `}
     >
-      <p
-        className="p-4"
-        onClick={() => {
-          setCurrentInput('');
-          debouncedCreateEntry.flush();
-          dispatchInputState({ type: 'toggleUnits' });
-        }}
+      <div
+        className="font-mono text-xl items-center"
+        css={css`
+          display: grid;
+          grid-template-columns: 50px auto 50px;
+          @media (min-width: 640px) and (pointer: coarse) {
+            grid-template-columns: 1fr ${MOBILE_KEY_MAX_WIDTH} 1fr;
+          }
+          @media (min-width: 768px) and (pointer: fine) {
+            grid-template-columns: 50px 580px 50px;
+          }
+        `}
       >
-        🔀
-      </p>
-      <div className="flex">
-        <div className="flex-1 w-24 sm:w-1/2 whitespace-nowrap">
-          {!isTouchDevice && (
-            <form
-              autoComplete="off"
-              onSubmit={(e) => {
-                debouncedCreateEntry.flush();
-                e.preventDefault();
-              }}
-            >
-              <div>
-                <input
-                  className="px-2 text-lg text-mono container bg-transparent shadow-none ring-0 border-0 outline-none"
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  autoFocus={true}
-                  ref={textInput}
-                  onChange={(e) => {
-                    onCurrentInputChange(
-                      conversionImplementation.sanitizeKeyboardInput(
-                        e.target.value
-                      )
-                    );
-                  }}
-                  value={
-                    latestInput === 'NaN' || !latestInput ? '' : latestInput
-                  }
-                />
-              </div>
-            </form>
-          )}
-          <span
-            css={css`
-              background-color: ${currentInput === ''
-                ? 'hsla(255, 0%, 100%, 0.2)'
-                : ''};
-              color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
-            `}
-            className={`inline-block text-right px-px whitespace-pre`}
+        <div>
+          <button
+            type="button"
+            aria-label="Flip conversion direction"
+            className="p-4 select-none"
+            onClick={() => {
+              setCurrentInput('');
+              debouncedCreateEntry.flush();
+              dispatchInputState({ type: 'toggleUnits' });
+            }}
           >
-            {latestInput || firstLoadBlankDisplay}
-          </span>
-          {isTouchDevice && (
-            <>
-              {/* inline-block is necessary for animating opacity for iOS Safari */}
-              {currentInput && (
-                <span
-                  className="h-full w-px inline-block align-bottom"
-                  key={latestInput /* effectively debounces animation */}
-                  css={css`
-                    background-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
-                    filter: hue-rotate(45deg);
-                    animation: ${blink} ease-in-out 0.6s infinite;
-                    animation-direction: alternate;
-                    animation-delay: 0.3s;
-                  `}
-                />
-              )}
-              {fromUnitInline}
-            </>
-          )}
+            🔀
+          </button>
         </div>
-        <p className="flex-1 sm:w-1/2 whitespace-nowrap text-right">
-          <span
-            className="px-px"
-            css={css`
-              color: ${INLINE_UNIT_TO_COLOR[toUnitInline]};
-            `}
-          >
-            {!latestInput
-              ? firstLoadBlankDisplay
-              : convert(conversionImplementation.parseInput(latestInput))}
-          </span>
-          {toUnitInline}
-        </p>
-      </div>
-      <div className="flex justify-end">
-        <div>{optionsComponent}</div>
+        <div className="flex">
+          <div className="flex-1 w-24 sm:w-1/2 whitespace-nowrap">
+            {!isTouchDevice ? (
+              <form
+                autoComplete="off"
+                onSubmit={(e) => {
+                  debouncedCreateEntry.flush();
+                  e.preventDefault();
+                }}
+              >
+                <div
+                  css={css`
+                    ::selection {
+                      background-color: hsla(0, 0%, 100%, 0.3);
+                    }
+                  `}
+                >
+                  <input
+                    className="appearance-none px-2 text-lg sm:text-2xl text-mono container bg-transparent shadow-none ring-0 border-0 outline-none"
+                    css={css`
+                      width: ${(currentInput || '').length || 1}ch;
+                      padding: 0;
+                      color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
+                      caret-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
+                      ::selection {
+                        background-color: hsla(0, 0%, 100%, 0.3);
+                      }
+                    `}
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    autoFocus={true}
+                    ref={textInput}
+                    onChange={(e) => {
+                      const sanitizedInput =
+                        conversionImplementation.sanitizeKeyboardInput(
+                          e.target.value
+                        );
+                      if (sanitizedInput !== currentInput) {
+                        onCurrentInputChange(sanitizedInput);
+                      }
+                    }}
+                    placeholder={shouldShowEmptyInput ? '_' : undefined}
+                    value={currentInput || ''}
+                  />
+                  {fromUnitInline}
+                </div>
+              </form>
+            ) : (
+              <>
+                <span
+                  css={css`
+                    background-color: ${currentInput === ''
+                      ? 'hsla(255, 0%, 100%, 0.2)'
+                      : ''};
+                    color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
+                  `}
+                  className={`inline-block text-right px-px whitespace-pre`}
+                >
+                  {latestInput || firstLoadBlankDisplay}
+                </span>
+                {/* inline-block is necessary for animating opacity for iOS Safari */}
+                {currentInput && (
+                  <span
+                    className="h-full w-px inline-block align-bottom"
+                    key={latestInput /* effectively debounces animation */}
+                    css={css`
+                      background-color: hsla(0, 0%, 100%, 0.3);
+                      animation: ${blink} ease-in-out 0.6s infinite;
+                      animation-direction: alternate;
+                      animation-delay: 0.3s;
+                    `}
+                  />
+                )}
+                {fromUnitInline}
+              </>
+            )}
+          </div>
+          <p className="flex-1 sm:w-1/2 whitespace-nowrap text-right text-lg sm:text-2xl">
+            <span
+              className="px-px"
+              css={css`
+                color: ${INLINE_UNIT_TO_COLOR[toUnitInline]};
+              `}
+            >
+              {!latestInput
+                ? firstLoadBlankDisplay
+                : convert(conversionImplementation.parseInput(latestInput))}
+            </span>
+            {toUnitInline}
+          </p>
+        </div>
+        <div className="flex justify-end">
+          <div>{optionsComponent}</div>
+        </div>
       </div>
     </div>
   );
@@ -485,31 +523,28 @@ const MetricApp = () => {
               <h1 className="text-2xl text-center">Length converter</h1>
             </div>
           </div>
-          <div
-            css={css`
-              @media (pointer: coarse) {
-                display: none;
-              }
-            `}
-          >
-            {resultsDisplay}
-          </div>
-          <div className="flex flex-wrap">
+          {!isTouchDevice && resultsDisplay}
+          <div className="flex flex-wrap md:max-w-[580px] md:mx-auto md:justify-between">
             {conversionHistory.length > 0 && (
-              <div className="p-2 w-full sm:w-1/2">
-                <h3 className="hidden sm:block text-2xl sm:text-center">
+              <div className="p-2 w-full sm:w-1/2 md:w-auto">
+                <h3 className="hidden sm:block text-2xl text-center md:text-left">
                   History
                 </h3>
                 <InputTable
+                  className="justify-center md:justify-start"
                   fromValues={conversionHistory}
                   conversionType={conversionType}
                   convert={convert}
                 />
               </div>
             )}
-            <div className="p-2 w-full mt-12 sm:mt-0 sm:w-1/2" key="reference">
-              <h3 className="text-2xl sm:text-center">Reference</h3>
+            <div
+              className="p-2 w-full mt-12 sm:mt-0 sm:w-1/2 md:w-auto"
+              key="reference"
+            >
+              <h3 className="text-2xl sm:text-left">Reference</h3>
               <InputTable
+                className="justify-center md:justify-start"
                 fromValues={conversionImplementation.reference}
                 conversionType={conversionType}
                 convert={convert}

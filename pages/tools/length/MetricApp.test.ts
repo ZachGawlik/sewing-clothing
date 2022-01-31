@@ -37,6 +37,7 @@ describe('MetricApp', () => {
       const { handleNewInput } = IMPLEMENTATIONS[ConversionType.fromCm];
       expect(handleNewInput('00')).toEqual('prevent');
       expect(handleNewInput('1234')).toEqual('prevent');
+      expect(handleNewInput('12.345')).toEqual('prevent');
       expect(handleNewInput('.1.')).toEqual('prevent');
       expect(handleNewInput('2..')).toEqual('prevent');
 
@@ -85,6 +86,8 @@ describe('MetricApp', () => {
       expect(handleNewInput('1.')).toEqual('debounce');
       expect(handleNewInput('1.5')).toEqual('debounce');
       expect(handleNewInput('1.52')).toEqual('flush');
+      expect(handleNewInput('1.234')).toEqual('prevent');
+      expect(handleNewInput('1 1.')).toEqual('prevent');
     });
   });
 });

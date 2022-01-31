@@ -3,7 +3,13 @@ import Link from 'next/link';
 import styles from '../../styles/Home.module.css';
 
 // TODO: Head and meta and whatnot
-const MdxLayout = ({ children }: { children: React.ReactElement }) => {
+const MdxLayout = ({
+  children,
+  showFooter,
+}: {
+  children: React.ReactElement;
+  showFooter?: boolean;
+}) => {
   return (
     <div className={`${styles.container} bg-gray-900 text-white`}>
       <header className="w-full max-w-prose lg:max-w-none">
@@ -15,6 +21,13 @@ const MdxLayout = ({ children }: { children: React.ReactElement }) => {
       <main className={styles.main}>
         <div className="prose prose-invert bg-gray-900">{children}</div>
       </main>
+      {showFooter && (
+        <footer className="w-full max-w-prose lg:max-w-none">
+          <Link href="/">
+            <a className="text-blue-400 font-mono">sewing.clothing</a>
+          </Link>
+        </footer>
+      )}
     </div>
   );
 };

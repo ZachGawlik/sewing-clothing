@@ -74,14 +74,12 @@ const fromCmImplementation = {
     ['.', '0'],
   ].flat(),
   sanitizeKeyboardInput: (strInput: string) => {
-    return strInput
-      .trim()
-      .replaceAll(/[^\d\.]/g, '')
-      .slice(0, 4);
+    return strInput.trim().replaceAll(/[^\d\.]/g, '');
   },
   parseInput: (cmString: string) => (cmString === '.' ? '0' : cmString),
   handleNewInput: (cmString: string) => {
     if (
+      cmString.length >= 5 ||
       cmString.match(/\d{4}/) || // prevent pasting in 1234. It's already impossible type this from below rules
       (cmString[0] === '.' && cmString[2] === '.') || // prevent .1.
       cmString.match(/^00/) ||
@@ -119,18 +117,20 @@ const fromCmImplementation = {
     conversionOptions: InputState[ConversionType.fromCm]['conversionOptions'];
     dispatchInputState: DispatchInputState;
   }) => (
-    <p
+    <button
+      type="button"
+      aria-label="Toggle on to display output to 1/16 precision"
       className={cx(
         {
           'bg-stone-700':
             conversionOptions.precision === INCH_RESULT_FORMATS.SIXTEENTHS,
         },
-        'px-2 mx-2 rounded'
+        'px-2 mx-2 rounded select-none'
       )}
       onClick={() => dispatchInputState({ type: 'toggleInchPrecision' })}
     >
       🎯
-    </p>
+    </button>
   ),
 };
 
@@ -168,6 +168,8 @@ const fromInchImplementation = {
       inchString.match(/\s\//) || // "1 /"
       inchString.match(/\/0/) || // "1/0 "
       inchString.match(/\/.*([^\d])/) || // "1/ " "1//" "1/1 "
+      inchString.match(/\.\d{3}/) || // 1.234
+      inchString.match(/ .*\./) || // 1 1.2
       inchString.match(/\d{4}/) ||
       inchString.match(/\d{3} /)
     ) {
@@ -211,7 +213,7 @@ const fromInchImplementation = {
 };
 
 export const INLINE_UNIT_TO_COLOR = {
-  [InlineUnit['"']]: '#fda4af', // text-red-300
+  [InlineUnit['"']]: '#fda4af', // text-rose-300
   [InlineUnit['cm']]: '#d8b4fe', // text-purple-300
 };
 
