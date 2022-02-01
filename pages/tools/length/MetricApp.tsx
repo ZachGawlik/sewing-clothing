@@ -30,11 +30,13 @@ const useIsTouchDevice = () => {
 const maxMobileKeyboardHeight = '350px';
 const mobileKeyDuration = 200;
 const MobileKey = ({
-  value,
+  className,
   onClick,
+  value,
 }: {
-  value: string;
+  className?: string;
   onClick: (key: string) => void;
+  value: string;
 }) => {
   const [clicked, setClicked] = React.useState<boolean>(false);
   const debounceUnclick = React.useMemo(
@@ -49,6 +51,7 @@ const MobileKey = ({
           background-color ease-out;
       `}
       className={cx(
+        className,
         'flex justify-center items-center rounded-md bg-zinc-700 shadow-md',
         { 'bg-zinc-500': clicked }
       )}
@@ -181,11 +184,6 @@ export type DispatchInputState = ReturnType<
   typeof useInputState
 >['dispatchInputState'];
 
-const tableCell = css`
-  width: 11ch;
-  padding: 0.5ch;
-`;
-
 const MOBILE_KEY_MAX_WIDTH = '450px';
 
 const InputTable = ({
@@ -202,13 +200,18 @@ const InputTable = ({
   const { fromUnitHeader, toUnitHeader, fromUnitInline, toUnitInline } =
     IMPLEMENTATIONS[conversionType];
 
+  const tableCell = css`
+    width: 11ch;
+    padding: 0.5ch;
+  `;
+
   return (
     <div className={cx(className, 'flex')}>
       <table className="font-mono table-fixed">
         <thead>
           <tr>
-            <th>{fromUnitHeader}</th>
-            <th>{toUnitHeader}</th>
+            <th css={tableCell}>{fromUnitHeader}</th>
+            <th css={tableCell}>{toUnitHeader}</th>
           </tr>
         </thead>
         <tbody>
@@ -307,8 +310,7 @@ const MetricApp = () => {
   const optionsComponent = (() => {
     switch (conversionType) {
       case 'fromInch': {
-        const { OptionsComponent } = IMPLEMENTATIONS[conversionType];
-        return <OptionsComponent />;
+        return null;
       }
       case 'fromCm': {
         const { OptionsComponent } = IMPLEMENTATIONS[conversionType];
@@ -316,6 +318,9 @@ const MetricApp = () => {
           <OptionsComponent
             conversionOptions={inputState[conversionType].conversionOptions}
             dispatchInputState={dispatchInputState}
+            onClick={() => {
+              textInput.current?.focus();
+            }}
           />
         );
       }
@@ -355,12 +360,28 @@ const MetricApp = () => {
     <span className="underline whitespace-pre">{'   '}</span>
   );
 
+  const [isInputBlurred, setIsInputBlurred] = React.useState(false);
+
+  // inline-block is necessary for animating opacity for iOS Safari
+  const mobileCursor = (
+    <span
+      className="h-full w-[2px] inline-block align-bottom"
+      key={latestInput /* effectively debounces animation */}
+      css={css`
+        background-color: hsla(0, 0%, 40%);
+        animation: ${blink} ease-in-out 0.8s infinite;
+        animation-direction: alternate;
+        animation-delay: 0.3s;
+      `}
+    />
+  );
+
   const resultsDisplay = (
     <div
       css={css`
         @media (min-width: 768px) and (pointer: fine) {
           margin: 0 auto;
-          width: 680px;
+          width: 620px;
         }
       `}
     >
@@ -373,7 +394,7 @@ const MetricApp = () => {
             grid-template-columns: 1fr ${MOBILE_KEY_MAX_WIDTH} 1fr;
           }
           @media (min-width: 768px) and (pointer: fine) {
-            grid-template-columns: 50px 580px 50px;
+            grid-template-columns: 50px 520px 50px;
           }
         `}
       >
@@ -386,6 +407,7 @@ const MetricApp = () => {
               setCurrentInput('');
               debouncedCreateEntry.flush();
               dispatchInputState({ type: 'toggleUnits' });
+              textInput.current?.focus();
             }}
           >
             🔀
@@ -413,17 +435,28 @@ const MetricApp = () => {
                     css={css`
                       width: ${(currentInput || '').length || 1}ch;
                       padding: 0;
-                      color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
-                      caret-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
+                      color: ${INLINE_UNIT_TO_COLOR[fromUnitInline].text};
+                      caret-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline].text};
                       ::selection {
-                        background-color: hsla(0, 0%, 100%, 0.3);
+                        background-color: hsl(0, 0%, 30%);
                       }
+                      background-color: ${isInputBlurred
+                        ? 'hsl(0, 0%, 30%)'
+                        : 'transparent'};
                     `}
                     type="text"
                     inputMode="decimal"
                     autoComplete="off"
                     autoFocus={true}
                     ref={textInput}
+                    onFocus={() => {
+                      console.log('zzzz input onfocus');
+                      setIsInputBlurred(false);
+                    }}
+                    onBlur={() => {
+                      console.log('zzzz input onblur');
+                      setIsInputBlurred(true);
+                    }}
                     onChange={(e) => {
                       const sanitizedInput =
                         conversionImplementation.sanitizeKeyboardInput(
@@ -441,30 +474,21 @@ const MetricApp = () => {
               </form>
             ) : (
               <>
+                <span className={cx('mr-px', { 'opacity-0': currentInput })}>
+                  {mobileCursor}
+                </span>
                 <span
                   css={css`
                     background-color: ${currentInput === ''
                       ? 'hsla(255, 0%, 100%, 0.2)'
                       : ''};
-                    color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]};
+                    color: ${INLINE_UNIT_TO_COLOR[fromUnitInline].text};
                   `}
                   className={`inline-block text-right px-px whitespace-pre`}
                 >
                   {latestInput || firstLoadBlankDisplay}
                 </span>
-                {/* inline-block is necessary for animating opacity for iOS Safari */}
-                {currentInput && (
-                  <span
-                    className="h-full w-px inline-block align-bottom"
-                    key={latestInput /* effectively debounces animation */}
-                    css={css`
-                      background-color: hsla(0, 0%, 100%, 0.3);
-                      animation: ${blink} ease-in-out 0.6s infinite;
-                      animation-direction: alternate;
-                      animation-delay: 0.3s;
-                    `}
-                  />
-                )}
+                {currentInput && mobileCursor}
                 {fromUnitInline}
               </>
             )}
@@ -473,7 +497,7 @@ const MetricApp = () => {
             <span
               className="px-px"
               css={css`
-                color: ${INLINE_UNIT_TO_COLOR[toUnitInline]};
+                color: ${INLINE_UNIT_TO_COLOR[toUnitInline].text};
               `}
             >
               {!latestInput
@@ -490,6 +514,7 @@ const MetricApp = () => {
     </div>
   );
 
+  const isEmptyHistoryMobile = isTouchDevice && conversionHistory.length === 0;
   return (
     <div>
       <div
@@ -524,8 +549,8 @@ const MetricApp = () => {
             </div>
           </div>
           {!isTouchDevice && resultsDisplay}
-          <div className="flex flex-wrap md:max-w-[580px] md:mx-auto md:justify-between">
-            {conversionHistory.length > 0 && (
+          <div className="flex flex-wrap md:max-w-[520px] md:mx-auto md:justify-between">
+            {!isEmptyHistoryMobile && (
               <div className="p-2 w-full sm:w-1/2 md:w-auto">
                 <h3 className="hidden sm:block text-2xl text-center md:text-left">
                   History
@@ -539,10 +564,14 @@ const MetricApp = () => {
               </div>
             )}
             <div
-              className="p-2 w-full mt-12 sm:mt-0 sm:w-1/2 md:w-auto"
+              className={cx('p-2 w-full sm:mt-0 sm:w-1/2 md:w-auto', {
+                'mt-12': !isEmptyHistoryMobile,
+              })}
               key="reference"
             >
-              <h3 className="text-2xl sm:text-left">Reference</h3>
+              {!isEmptyHistoryMobile && (
+                <h3 className="text-2xl sm:text-left">Reference</h3>
+              )}
               <InputTable
                 className="justify-center md:justify-start"
                 fromValues={conversionImplementation.reference}
@@ -559,12 +588,20 @@ const MetricApp = () => {
               height: 50%;
               max-height: ${maxMobileKeyboardHeight};
               padding-bottom: env(safe-area-inset-bottom, 50px);
+              background-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]
+                .mobileKeyBg};
 
               z-index: 1; /* must be set for shadow to display */
               box-shadow: 0px -5px 15px -5px black;
             `}
           >
-            <div className="bg-stone-900 border-t border-stone-700">
+            <div
+              className={`border-t`}
+              css={css`
+                border-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline]
+                  .mobileKeyBorder};
+              `}
+            >
               {resultsDisplay}
             </div>
             <div className="h-full select-none py-4 px-3">
@@ -579,6 +616,9 @@ const MetricApp = () => {
                     <MobileKey
                       key={key}
                       value={key}
+                      css={css`
+                        color: ${INLINE_UNIT_TO_COLOR[fromUnitInline].text};
+                      `}
                       onClick={(newKey: string) => {
                         onCurrentInputChange(`${currentInput}${newKey}`);
                       }}

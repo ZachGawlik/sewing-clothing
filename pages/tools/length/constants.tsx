@@ -113,9 +113,11 @@ const fromCmImplementation = {
   OptionsComponent: ({
     conversionOptions,
     dispatchInputState,
+    onClick,
   }: {
     conversionOptions: InputState[ConversionType.fromCm]['conversionOptions'];
     dispatchInputState: DispatchInputState;
+    onClick: () => void;
   }) => (
     <button
       type="button"
@@ -127,7 +129,10 @@ const fromCmImplementation = {
         },
         'px-2 mx-2 rounded select-none'
       )}
-      onClick={() => dispatchInputState({ type: 'toggleInchPrecision' })}
+      onClick={() => {
+        dispatchInputState({ type: 'toggleInchPrecision' });
+        onClick();
+      }}
     >
       🎯
     </button>
@@ -159,8 +164,10 @@ const fromInchImplementation = {
     //       as legit disabling the mobile key input button. Not sure how to do that in a way that isn't distracting
     //       and in a way that could maybe reuse some of this logic that needs to exist for desktop input
     if (
-      [' ', '/'].includes(inchString) ||
-      inchString.match(/^00/) ||
+      inchString.match(/^ /) ||
+      inchString.match(/^\//) ||
+      inchString.match(/^0/) ||
+      inchString.match(/ 0/) ||
       inchString.match(/[^\d \/\.]/) ||
       inchString.match(/[^\d]\./) || // "1 ."
       inchString.match(/\..*[^\d]/) || // "1. "
@@ -209,12 +216,20 @@ const fromInchImplementation = {
     const cm = inch * INCH_TO_CM_RATIO;
     return cm > 100 ? `${Math.round(cm)}` : toFixed(cm, cm < 1 ? 2 : 1);
   },
-  OptionsComponent: () => null,
 };
 
 export const INLINE_UNIT_TO_COLOR = {
-  [InlineUnit['"']]: '#fda4af', // text-rose-300
-  [InlineUnit['cm']]: '#d8b4fe', // text-purple-300
+  [InlineUnit['"']]: {
+    text: '#fda4af', // text-rose-300
+    mobileKeyBorder: '#44403c', // stone-700
+    mobileKeyBg: '#1c1917', // stone-900
+  },
+  [InlineUnit['cm']]: {
+    text: '#d8b4fe', // purple-300
+    mobileKey: '#d8b4fe', // purple-100
+    mobileKeyBorder: '#334155', // slate-700
+    mobileKeyBg: '#0f172a', // slate-900
+  },
 };
 
 export const IMPLEMENTATIONS = {

@@ -66,6 +66,8 @@ describe('MetricApp', () => {
       expect(handleNewInput('1/2/')).toEqual('prevent');
       expect(handleNewInput('1/0')).toEqual('prevent');
       expect(handleNewInput('1/1 ')).toEqual('prevent');
+      expect(handleNewInput('0')).toEqual('prevent');
+      expect(handleNewInput('1 0')).toEqual('prevent');
 
       expect(handleNewInput('1/2')).toEqual('flush');
       expect(handleNewInput('1/7')).toEqual('flush'); // prevent two-digit denominators even for nonstandard single-digit denominators
@@ -74,8 +76,6 @@ describe('MetricApp', () => {
       expect(handleNewInput('5/16')).toEqual('flush');
       expect(handleNewInput('252')).toEqual('flush');
 
-      expect(handleNewInput('0 ')).toEqual('debounce');
-      expect(handleNewInput('0/')).toEqual('debounce');
       expect(handleNewInput('5 ')).toEqual('debounce');
       expect(handleNewInput('5/1')).toEqual('debounce'); // typing 5/16. /1 is the only allowed start for a two-digit denominator
       expect(handleNewInput('25/')).toEqual('debounce');
