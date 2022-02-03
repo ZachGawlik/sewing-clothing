@@ -176,9 +176,9 @@ const fromInchImplementation = {
       inchString.match(/\/0/) || // "1/0 "
       inchString.match(/\/.*([^\d])/) || // "1/ " "1//" "1/1 "
       inchString.match(/\.\d{3}/) || // 1.234
-      inchString.match(/ .*\./) || // 1 1.2
-      inchString.match(/\d{4}/) ||
-      inchString.match(/\d{3} /)
+      inchString.match(/\/\d{3}/) || // 1/234
+      inchString.match(/^\d{3}.+/) || // 123/
+      inchString.match(/ .*\./) // 1 1.2
     ) {
       return 'prevent';
     }

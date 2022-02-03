@@ -66,6 +66,8 @@ describe('MetricApp', () => {
       expect(handleNewInput('1/2/')).toEqual('prevent');
       expect(handleNewInput('1/0')).toEqual('prevent');
       expect(handleNewInput('1/1 ')).toEqual('prevent');
+      expect(handleNewInput('1/234')).toEqual('prevent');
+      expect(handleNewInput('123/')).toEqual('prevent');
       expect(handleNewInput('0')).toEqual('prevent');
       expect(handleNewInput('1 0')).toEqual('prevent');
 

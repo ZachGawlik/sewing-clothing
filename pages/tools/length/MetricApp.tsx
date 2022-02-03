@@ -65,16 +65,6 @@ const MobileKey = ({
   );
 };
 
-/* Rest */
-
-/*
-TODOS:
- * Inch -> cm input.
- * Quick improvements for tablet
- * Uhhhhhh yards <-> meters?
- * Use locale to determine "." vs "," separator
-*/
-
 const initialInputState = {
   shouldShowEmptyInput: true,
   conversionType: ConversionType.fromCm,
@@ -243,13 +233,15 @@ const blink = keyframes`
 
 const MetricApp = () => {
   const textInput = React.useRef<HTMLInputElement>(null);
+  const [currentInput, setCurrentInput] = React.useState<string>('');
   React.useEffect(() => {
     textInput.current?.focus();
   }, []);
 
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key.match(/[\d\.]/)) {
+      if (e.key.match(/[\d\.\/ ]/)) {
+        setCurrentInput('');
         textInput.current?.focus();
       }
     };
@@ -258,8 +250,6 @@ const MetricApp = () => {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, []);
-
-  const [currentInput, setCurrentInput] = React.useState<string>('');
 
   const { inputState, dispatchInputState } = useInputState();
   const { conversionType, shouldShowEmptyInput } = inputState;
@@ -447,12 +437,22 @@ const MetricApp = () => {
                     autoFocus={true}
                     ref={textInput}
                     onFocus={() => {
-                      console.log('zzzz input onfocus');
                       setIsInputBlurred(false);
                     }}
                     onBlur={() => {
-                      console.log('zzzz input onblur');
                       setIsInputBlurred(true);
+                    }}
+                    onKeyDown={(e) => {
+                      // Wipe past entry if user typed digit after deselecting flushed input
+                      if (
+                        e.key.match(/\d/) &&
+                        conversionImplementation.handleNewInput(
+                          currentInput || ''
+                        ) === 'flush'
+                      ) {
+                        setCurrentInput('');
+                      }
+                      e.stopPropagation();
                     }}
                     onChange={(e) => {
                       const sanitizedInput =
@@ -501,7 +501,9 @@ const MetricApp = () => {
                 ? firstLoadBlankDisplay
                 : convert(conversionImplementation.parseInput(latestInput))}
             </span>
-            {toUnitInline}
+            <span className="w-[2ch] inline-block text-left">
+              {toUnitInline}
+            </span>
           </p>
         </div>
         <div className="flex justify-end">
