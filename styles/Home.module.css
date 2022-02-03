@@ -1,6 +1,7 @@
 .container {
-  min-height: 100vh;
+  height: 100%;
   min-width: 100vw;
+  display: flex;
   padding: 0 1rem;
   display: flex;
   flex-direction: column;
@@ -8,5 +9,6 @@
 }
 
 .main {
+  height: 100%;
   padding: 2rem 0;
 }

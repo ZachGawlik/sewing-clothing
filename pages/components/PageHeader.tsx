@@ -1,12 +1,18 @@
 import Link from 'next/link';
+import * as React from 'react';
 
-const PageHeader = () => (
-  <header className="w-full max-w-prose lg:max-w-none">
+const PageHeader = ({
+  className,
+  children,
+}: {
+  className?: string;
+  children?: React.ReactElement;
+}) => (
+  <header className={`pt-2 w-full ${className}`}>
     <Link href="/">
-      <a className="text-sky-200 hover:text-sky-300 font-mono">
-        sewing.clothing
-      </a>
+      <a className="text-blue-400 font-mono">sewing.clothing</a>
     </Link>
+    {children}
   </header>
 );
 

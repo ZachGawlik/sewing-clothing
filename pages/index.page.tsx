@@ -1,26 +1,34 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { Global, css } from '@emotion/react';
 
 import styles from '../styles/Home.module.css';
 
 /* eslint-disable @next/next/no-img-element */
 const Home: NextPage = () => {
   return (
-    <div
-      className={`${styles.container} bg-gray-900 text-white justify-center`}
-    >
+    <div className={`${styles.container} justify-center`}>
       <Head>
         <title>sewing.clothing</title>
         <meta name="description" content="Sewing clothing - tools & thoughts" />
       </Head>
+      <Global
+        styles={css`
+          body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+          }
+        `}
+      />
       <main className={styles.main}>
         <div className="prose prose-invert prose-a:text-sky-200 prose-a:no-underline">
           <img src="/under-construction-1.png" alt="" />
           <h1 className="font-mono text-4xl text-center">sewing.clothing</h1>
           {[
             {
-              emoji: '🏁',
+              emoji: '📄',
               text: 'Getting started with sewing clothing',
               href: '/start',
             },

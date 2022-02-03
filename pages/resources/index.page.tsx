@@ -8,7 +8,7 @@ import styles from '../../styles/Home.module.css';
 
 const ResourcesPage: NextPage = () => {
   return (
-    <div className={`${styles.container} bg-gray-900 text-white`}>
+    <div className={`${styles.container}`}>
       <Head>
         <title>Resources - Sewing Clothing</title>
         <meta name="description" content="Sewing resources" />

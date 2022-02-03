@@ -1,16 +1,15 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { css, keyframes } from '@emotion/react';
-import Link from 'next/link';
+import { Global, css, keyframes } from '@emotion/react';
 import debounce from 'lodash/debounce';
 import immer from 'immer';
-import { useAppHeight } from 'utils/hooks';
 import {
   ConversionType,
   INLINE_UNIT_TO_COLOR,
   IMPLEMENTATIONS,
   INCH_RESULT_FORMATS,
 } from './constants';
+import PageHeader from 'pages/components/PageHeader';
 
 const useIsTouchDevice = () => {
   const [isTouchDevice, setIsTouchDevice] = React.useState(false);
@@ -243,8 +242,6 @@ const blink = keyframes`
 `;
 
 const MetricApp = () => {
-  useAppHeight();
-
   const textInput = React.useRef<HTMLInputElement>(null);
   React.useEffect(() => {
     textInput.current?.focus();
@@ -516,12 +513,19 @@ const MetricApp = () => {
 
   const isEmptyHistoryMobile = isTouchDevice && conversionHistory.length === 0;
   return (
-    <div>
+    <div className="h-full">
+      <Global
+        styles={css`
+          html,
+          body {
+            height: 100%;
+          }
+        `}
+      />
       <div
         className="flex flex-col"
         css={css`
-          height: 100vh;
-          height: var(--app-height);
+          height: 100%;
           overflow-y: auto;
         `}
       >
@@ -529,27 +533,15 @@ const MetricApp = () => {
           className="overflow-y-scroll"
           css={css`
             @media (pointer: coarse) {
-              height: max(
-                50%,
-                calc(var(--app-height) - ${maxMobileKeyboardHeight})
-              );
+              height: 50%;
             }
           `}
         >
-          <div className="px-4">
-            <div className="mb-8">
-              <div className="flex place-content-between">
-                <div>
-                  <Link href="/">
-                    <a className="text-blue-400 font-mono">sewing.clothing</a>
-                  </Link>
-                </div>
-              </div>
-              <h1 className="text-2xl text-center">Length converter</h1>
-            </div>
-          </div>
+          <PageHeader className="px-4 md:mb-8">
+            <h1 className="text-2xl text-center">Length converter</h1>
+          </PageHeader>
           {!isTouchDevice && resultsDisplay}
-          <div className="flex flex-wrap md:max-w-[520px] md:mx-auto md:justify-between">
+          <main className="flex flex-wrap md:max-w-[520px] md:mx-auto md:justify-between">
             {!isEmptyHistoryMobile && (
               <div className="p-2 w-full sm:w-1/2 md:w-auto">
                 <h3 className="hidden sm:block text-2xl text-center md:text-left">
@@ -579,7 +571,7 @@ const MetricApp = () => {
                 convert={convert}
               />
             </div>
-          </div>
+          </main>
         </div>
         {isTouchDevice && (
           <div

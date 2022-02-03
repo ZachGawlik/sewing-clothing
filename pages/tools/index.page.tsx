@@ -9,8 +9,7 @@ const ToolsPage: NextPage = () => {
         <title>sewing tools</title>
         <meta name="description" content="Sewing tools" />
       </Head>
-
-      <main className="bg-gray-900 text-white min-h-screen space-y-8 py-4 px-4">
+      <main className="min-h-screen space-y-8 py-4 px-4">
         <h1 className="font-mono">
           <Link href="/">
             <a className="text-blue-400">sewing.clothing</a>
