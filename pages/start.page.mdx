@@ -1,6 +1,10 @@
 import MdxLayout from './components/MdxLayout';
 
-# Getting started with sewing clothing - what surprised me
+export const meta = {
+  title: 'Getting started with sewing clothing - what surprised me',
+  description:
+    'After sewing my own clothes for a year, here are the things that surprised me even after extensively researching this hobby.',
+};
 
 Hi! I've been sewing clothing for a year now.
 Here are the things that surprised me about making my own clothes
@@ -107,5 +111,7 @@ Regardless of what you choose, have fun with it!
 And remember there's an "undo" button via your seam ripper.
 
 export default ({ children }) => (
-  <MdxLayout showFooter={true}>{children}</MdxLayout>
+  <MdxLayout showFooter={true} meta={meta}>
+    {children}
+  </MdxLayout>
 );

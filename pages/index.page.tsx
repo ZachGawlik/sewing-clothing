@@ -10,8 +10,12 @@ const Home: NextPage = () => {
   return (
     <div className={`${styles.container} justify-center`}>
       <Head>
-        <title>sewing.clothing</title>
-        <meta name="description" content="Sewing clothing - tools & thoughts" />
+        <title>Sewing clothing</title>
+        <meta
+          name="description"
+          content="Helpful tools & info for garment sewing"
+        />
+        <meta name="theme-color" content="#111827" />
       </Head>
       <Global
         styles={css`

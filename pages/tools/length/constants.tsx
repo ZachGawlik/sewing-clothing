@@ -1,4 +1,4 @@
-import cx from 'classnames';
+import { css } from '@emotion/react';
 import type { InputState, DispatchInputState } from './MetricApp';
 
 export enum INCH_RESULT_FORMATS {
@@ -122,13 +122,18 @@ const fromCmImplementation = {
     <button
       type="button"
       aria-label="Toggle on to display output to 1/16 precision"
-      className={cx(
-        {
-          'bg-stone-700':
-            conversionOptions.precision === INCH_RESULT_FORMATS.SIXTEENTHS,
-        },
-        'px-2 mx-2 rounded select-none'
-      )}
+      className="px-2 mx-2 rounded select-none"
+      css={css`
+        &,
+        &:hover,
+        &:active,
+        &:focus {
+          background: ${conversionOptions.precision ===
+          INCH_RESULT_FORMATS.SIXTEENTHS
+            ? 'hsla(255, 0%, 100%, 0.2)'
+            : 'transparent'};
+        }
+      `}
       onClick={() => {
         dispatchInputState({ type: 'toggleInchPrecision' });
         onClick();

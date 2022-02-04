@@ -366,6 +366,10 @@ const MetricApp = () => {
   const resultsDisplay = (
     <div
       css={css`
+        @media (min-width: 640px) and (pointer: fine) {
+          margin: 0 auto;
+          width: 600px;
+        }
         @media (min-width: 768px) and (pointer: fine) {
           margin: 0 auto;
           width: 620px;
@@ -379,6 +383,9 @@ const MetricApp = () => {
           grid-template-columns: 50px auto 50px;
           @media (min-width: 640px) and (pointer: coarse) {
             grid-template-columns: 1fr ${MOBILE_KEY_MAX_WIDTH} 1fr;
+          }
+          @media (min-width: 640px) and (pointer: fine) {
+            grid-template-columns: 50px 500px 50px;
           }
           @media (min-width: 768px) and (pointer: fine) {
             grid-template-columns: 50px 520px 50px;
@@ -400,7 +407,7 @@ const MetricApp = () => {
             🔀
           </button>
         </div>
-        <div className="flex">
+        <div className="flex text-mono text-lg sm:text-2xl md:text-3xl">
           <div className="flex-1 w-24 sm:w-1/2 whitespace-nowrap">
             {!isTouchDevice ? (
               <form
@@ -418,14 +425,15 @@ const MetricApp = () => {
                   `}
                 >
                   <input
-                    className="appearance-none px-2 text-lg sm:text-2xl text-mono container bg-transparent shadow-none ring-0 border-0 outline-none"
+                    className="appearance-none px-2 container bg-transparent shadow-none ring-0 border-0 outline-none"
                     css={css`
                       width: ${(currentInput || '').length || 1}ch;
                       padding: 0;
                       color: ${INLINE_UNIT_TO_COLOR[fromUnitInline].text};
                       caret-color: ${INLINE_UNIT_TO_COLOR[fromUnitInline].text};
                       ::selection {
-                        background-color: hsl(0, 0%, 30%);
+                        /* Desktop Safari sets selection nearly black unless alpha is added. Higher alpha values fail */
+                        background-color: hsla(0, 0%, 30%, 0.995);
                       }
                       background-color: ${isInputBlurred
                         ? 'hsl(0, 0%, 30%)'
@@ -490,7 +498,7 @@ const MetricApp = () => {
               </>
             )}
           </div>
-          <p className="flex-1 sm:w-1/2 whitespace-nowrap text-right text-lg sm:text-2xl">
+          <p className="flex-1 sm:w-1/2 whitespace-nowrap text-right">
             <span
               className="px-px"
               css={css`
@@ -536,6 +544,7 @@ const MetricApp = () => {
           css={css`
             @media (pointer: coarse) {
               height: 50%;
+              min-height: calc(100% - ${maxMobileKeyboardHeight});
             }
           `}
         >
@@ -543,14 +552,14 @@ const MetricApp = () => {
             <h1 className="text-2xl text-center">Length converter</h1>
           </PageHeader>
           {!isTouchDevice && resultsDisplay}
-          <main className="flex flex-wrap md:max-w-[520px] md:mx-auto md:justify-between">
+          <main className="flex flex-wrap sm:max-w-[500px] md:max-w-[520px] sm:mx-auto sm:justify-between md:mt-4 lg:mt-8">
             {!isEmptyHistoryMobile && (
-              <div className="p-2 w-full sm:w-1/2 md:w-auto">
-                <h3 className="hidden sm:block text-2xl text-center md:text-left">
+              <div className="p-2 w-full sm:w-auto">
+                <h3 className="hidden sm:block text-2xl text-center sm:text-left">
                   History
                 </h3>
                 <InputTable
-                  className="justify-center md:justify-start"
+                  className="justify-center sm:justify-start"
                   fromValues={conversionHistory}
                   conversionType={conversionType}
                   convert={convert}
@@ -558,7 +567,7 @@ const MetricApp = () => {
               </div>
             )}
             <div
-              className={cx('p-2 w-full sm:mt-0 sm:w-1/2 md:w-auto', {
+              className={cx('p-2 w-full sm:mt-0 sm:w-auto', {
                 'mt-12': !isEmptyHistoryMobile,
               })}
               key="reference"
@@ -567,7 +576,7 @@ const MetricApp = () => {
                 <h3 className="text-2xl sm:text-left">Reference</h3>
               )}
               <InputTable
-                className="justify-center md:justify-start"
+                className="justify-center sm:justify-start"
                 fromValues={conversionImplementation.reference}
                 conversionType={conversionType}
                 convert={convert}
@@ -598,7 +607,7 @@ const MetricApp = () => {
             >
               {resultsDisplay}
             </div>
-            <div className="h-full select-none py-4 px-3">
+            <div className="h-full select-none pb-4 px-3">
               <div className="flex justify-center align-center h-full">
                 <div
                   className="grid grid-cols-3 grid-rows-4 h-full w-full gap-2"

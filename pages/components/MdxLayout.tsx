@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
 import { css } from '@emotion/react';
 import styles from '../../styles/Home.module.css';
@@ -8,15 +9,25 @@ import PageHeader from './PageHeader';
 const MdxLayout = ({
   children,
   showFooter,
+  meta,
 }: {
   children: React.ReactElement;
   showFooter?: boolean;
+  meta: {
+    title: string;
+    description: string;
+  };
 }) => {
   return (
     <div className={`${styles.container}`}>
+      <Head>
+        <title>{meta.title}</title>
+        <meta name="description" content={meta.description} />
+      </Head>
       <PageHeader className="max-w-prose lg:max-w-none" />
-      <main className={styles.main}>
-        <div className="prose prose-invert">{children}</div>
+      <main className={`${styles.main} prose prose-invert`}>
+        <h1>{meta.title}</h1>
+        {children}
       </main>
       {showFooter && (
         <footer

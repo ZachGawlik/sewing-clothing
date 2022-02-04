@@ -7,8 +7,11 @@ const MetricPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Metric Imperial Converter - Inches and Centimeters</title>
-        <meta name="description" content="Sewing length converter, cm & inch" />
+        <title>Length Converter - inch to cm</title>
+        <meta
+          name="description"
+          content="Metric & Imperial length conversion for sewing. cm to inch, inch to cm"
+        />
         <meta name="theme-color" content="rgb(17,24,39)" />
       </Head>
       <MetricApp />
