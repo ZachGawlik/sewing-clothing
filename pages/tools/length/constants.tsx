@@ -83,9 +83,7 @@ const fromCmImplementation = {
       cmString.match(/\d{4}/) || // prevent pasting in 1234. It's already impossible type this from below rules
       (cmString[0] === '.' && cmString[2] === '.') || // prevent .1.
       cmString.match(/^00/) ||
-      (cmString.length >= 2 &&
-        cmString[cmString.length - 2] === '.' &&
-        cmString[cmString.length - 1] === '.') // prevent 2..
+      cmString.match(/\..*\./)
     ) {
       return 'prevent';
     }

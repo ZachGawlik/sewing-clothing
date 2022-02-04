@@ -30,11 +30,11 @@ const maxMobileKeyboardHeight = '350px';
 const mobileKeyDuration = 200;
 const MobileKey = ({
   className,
-  onClick,
+  onTouchStart,
   value,
 }: {
   className?: string;
-  onClick: (key: string) => void;
+  onTouchStart: (key: string) => void;
   value: string;
 }) => {
   const [clicked, setClicked] = React.useState<boolean>(false);
@@ -45,22 +45,27 @@ const MobileKey = ({
 
   return (
     <div
-      css={css`
-        transition: ${clicked ? '0ms' : `${mobileKeyDuration}ms`}
-          background-color ease-out;
-      `}
-      className={cx(
-        className,
-        'flex justify-center items-center rounded-md bg-zinc-700 shadow-md',
-        { 'bg-zinc-500': clicked }
-      )}
-      onClick={() => {
+      className="p-1"
+      onTouchStart={() => {
+        // onClick is too slow when using both thumbs to input
         setClicked(true);
-        onClick(value);
+        onTouchStart(value);
         debounceUnclick();
       }}
     >
-      <span>{value}</span>
+      <div
+        css={css`
+          transition: ${clicked ? '0ms' : `${mobileKeyDuration}ms`}
+            background-color ease-out;
+        `}
+        className={cx(
+          className,
+          'h-full w-full flex justify-center items-center rounded-md bg-zinc-700 shadow-md',
+          { 'bg-zinc-500': clicked }
+        )}
+      >
+        <span>{value}</span>
+      </div>
     </div>
   );
 };
@@ -607,10 +612,10 @@ const MetricApp = () => {
             >
               {resultsDisplay}
             </div>
-            <div className="h-full select-none pb-4 px-3">
+            <div className="h-full select-none touch-none pb-4 px-3">
               <div className="flex justify-center align-center h-full">
                 <div
-                  className="grid grid-cols-3 grid-rows-4 h-full w-full gap-2"
+                  className="grid grid-cols-3 grid-rows-4 h-full w-full"
                   css={css`
                     max-width: ${MOBILE_KEY_MAX_WIDTH};
                   `}
@@ -622,7 +627,7 @@ const MetricApp = () => {
                       css={css`
                         color: ${INLINE_UNIT_TO_COLOR[fromUnitInline].text};
                       `}
-                      onClick={(newKey: string) => {
+                      onTouchStart={(newKey: string) => {
                         onCurrentInputChange(`${currentInput}${newKey}`);
                       }}
                     />

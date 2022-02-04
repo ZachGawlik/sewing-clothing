@@ -40,6 +40,7 @@ describe('MetricApp', () => {
       expect(handleNewInput('12.345')).toEqual('prevent');
       expect(handleNewInput('.1.')).toEqual('prevent');
       expect(handleNewInput('2..')).toEqual('prevent');
+      expect(handleNewInput('1.1.')).toEqual('prevent');
 
       expect(handleNewInput('123')).toEqual('flush');
       expect(handleNewInput('12.3')).toEqual('flush');
