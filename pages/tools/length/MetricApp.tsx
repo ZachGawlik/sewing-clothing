@@ -519,9 +519,7 @@ const MetricApp = () => {
             </span>
           </p>
         </div>
-        <div className="flex justify-end">
-          <div>{optionsComponent}</div>
-        </div>
+        <div>{optionsComponent}</div>
       </div>
     </div>
   );

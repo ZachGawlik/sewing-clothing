@@ -117,28 +117,26 @@ const fromCmImplementation = {
     dispatchInputState: DispatchInputState;
     onClick: () => void;
   }) => (
-    <button
-      type="button"
-      aria-label="Toggle on to display output to 1/16 precision"
-      className="px-2 mx-2 rounded select-none"
-      css={css`
-        &,
-        &:hover,
-        &:active,
-        &:focus {
-          background: ${conversionOptions.precision ===
-          INCH_RESULT_FORMATS.SIXTEENTHS
-            ? 'hsla(255, 0%, 100%, 0.2)'
-            : 'transparent'};
-        }
-      `}
-      onClick={() => {
-        dispatchInputState({ type: 'toggleInchPrecision' });
-        onClick();
-      }}
-    >
-      🎯
-    </button>
+    <div className="flex justify-center">
+      <button
+        type="button"
+        aria-label="Toggle on to display output to 1/16 precision"
+        className="p-2 rounded select-none font-sans text-sm"
+        onClick={() => {
+          dispatchInputState({ type: 'toggleInchPrecision' });
+          onClick();
+        }}
+      >
+        <div className="text-gray-300">
+          <sup>x</sup>&frasl;
+          <sub>
+            {conversionOptions.precision === INCH_RESULT_FORMATS.SIXTEENTHS
+              ? 16
+              : 8}
+          </sub>
+        </div>
+      </button>
+    </div>
   ),
 };
 
