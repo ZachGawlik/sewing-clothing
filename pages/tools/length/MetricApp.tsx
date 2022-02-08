@@ -503,11 +503,21 @@ const MetricApp = () => {
               </>
             )}
           </div>
-          <p className="flex-1 sm:w-1/2 whitespace-nowrap text-right">
+          <p
+            className={cx('flex-1 sm:w-1/2 whitespace-nowrap', {
+              'text-right': isTouchDevice,
+            })}
+          >
             <span
               className="px-px"
               css={css`
                 color: ${INLINE_UNIT_TO_COLOR[toUnitInline].text};
+                @media (min-width: 640px) and (pointer: fine) {
+                  padding-left: 30px;
+                }
+                @media (min-width: 768px) and (pointer: fine) {
+                  padding-left: 40px;
+                }
               `}
             >
               {!latestInput
