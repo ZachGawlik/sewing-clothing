@@ -44,15 +44,14 @@ describe('MetricApp', () => {
 
       expect(handleNewInput('123')).toEqual('flush');
       expect(handleNewInput('12.3')).toEqual('flush');
-      expect(handleNewInput('1.23')).toEqual('flush');
-      expect(handleNewInput('0.12')).toEqual('flush');
+      expect(handleNewInput('1.2')).toEqual('flush');
+      expect(handleNewInput('0.1')).toEqual('flush');
       expect(handleNewInput('.12')).toEqual('flush');
 
       expect(handleNewInput('1')).toEqual('debounce');
       expect(handleNewInput('12')).toEqual('debounce');
       expect(handleNewInput('12.')).toEqual('debounce');
-      expect(handleNewInput('1.2')).toEqual('debounce');
-      expect(handleNewInput('0.1')).toEqual('debounce');
+      expect(handleNewInput('0.')).toEqual('debounce');
     });
     test('fromInch', () => {
       const { handleNewInput } = IMPLEMENTATIONS[ConversionType.fromInch];

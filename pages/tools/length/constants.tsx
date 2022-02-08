@@ -1,4 +1,3 @@
-import { css } from '@emotion/react';
 import type { InputState, DispatchInputState } from './MetricApp';
 
 export enum INCH_RESULT_FORMATS {
@@ -81,7 +80,6 @@ const fromCmImplementation = {
     if (
       cmString.length >= 5 ||
       cmString.match(/\d{4}/) || // prevent pasting in 1234. It's already impossible type this from below rules
-      (cmString[0] === '.' && cmString[2] === '.') || // prevent .1.
       cmString.match(/^00/) ||
       cmString.match(/\..*\./)
     ) {
@@ -89,9 +87,9 @@ const fromCmImplementation = {
     }
 
     if (
-      cmString.match(/^\d{3}$/) || // 123
-      cmString.length === 4 || // 12.3, 1.23, 0.12
-      (cmString.length === 3 && cmString[0] === '.') // .12
+      cmString.match(/\d{3}/) || // 123
+      cmString.match(/\.\d/) || // .1
+      cmString.length === 4 // 12.3
     ) {
       return 'flush';
     } else {
