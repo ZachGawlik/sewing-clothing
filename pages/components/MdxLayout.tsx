@@ -36,8 +36,8 @@ const MdxLayout = ({
             padding-bottom: calc(env(safe-area-inset-bottom, 0) + 0.5em);
           `}
         >
-          <Link href="/">
-            <a className="text-blue-400 font-mono">sewing.clothing</a>
+          <Link href="/" className="text-blue-400 font-mono">
+            sewing.clothing
           </Link>
         </footer>
         // TODO: iphone safe spadding

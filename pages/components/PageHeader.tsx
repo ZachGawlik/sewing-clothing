@@ -9,8 +9,8 @@ const PageHeader = ({
   children?: React.ReactElement;
 }) => (
   <header className={`pt-2 w-full ${className}`}>
-    <Link href="/">
-      <a className="text-blue-400 font-mono">sewing.clothing</a>
+    <Link href="/" className="text-blue-400 font-mono">
+      sewing.clothing
     </Link>
     {children}
   </header>

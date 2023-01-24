@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const withPlugins = require('next-compose-plugins');
-const optimizedImages = require('next-optimized-images');
-
 const withMDX = require('@next/mdx')({
   extension: /\.mdx?$/,
   options: {
@@ -20,10 +17,12 @@ const nextConfig = {
     'page.mdx',
     'page.md',
   ],
-  images: {
-    disableStaticImages: true,
+  compiler: {
+    emotion: {
+      labelFormat: '[filename]--[local]',
+    },
   },
 };
 
 /** @type {import('next').NextConfig} */
-module.exports = withPlugins([optimizedImages], withMDX(nextConfig));
+module.exports = withMDX(nextConfig);

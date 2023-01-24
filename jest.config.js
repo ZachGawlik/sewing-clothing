@@ -1,11 +1,18 @@
+const nextJest = require('next/jest');
+
+const createJestConfig = nextJest({
+  // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
+  dir: './',
+});
+
 // jest.config.js
-module.exports = {
+const customJestConfig = {
   collectCoverageFrom: [
     '**/*.{js,jsx,ts,tsx}',
     '!**/*.d.ts',
     '!**/node_modules/**',
   ],
-  moduleDirectories: ['node_modules', '.'],
+  moduleDirectories: ['node_modules', '<rootDir>/'],
   moduleNameMapper: {
     // Handle CSS imports (with CSS modules)
     // https://jestjs.io/docs/webpack#mocking-css-modules
@@ -23,7 +30,7 @@ module.exports = {
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
-  testEnvironment: 'jsdom',
+  testEnvironment: 'jest-environment-jsdom',
   transform: {
     // Use babel-jest to transpile tests with the next/babel preset
     // https://jestjs.io/docs/configuration#transform-objectstring-pathtotransformer--pathtotransformer-object
@@ -34,3 +41,5 @@ module.exports = {
     '^.+\\.module\\.(css|sass|scss)$',
   ],
 };
+
+module.exports = createJestConfig(customJestConfig);

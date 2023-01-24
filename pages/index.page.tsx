@@ -45,10 +45,10 @@ const Home: NextPage = () => {
           ].map(({ emoji, text, href }) => (
             <p key={text}>
               {emoji}
-              <Link href={href}>
-                <a className="pl-2 hover:underline hover:text-sky-300">
-                  {text}
-                </a>
+              <Link href={href} className="pl-2 hover:underline hover:text-sky-300">
+
+                {text}
+
               </Link>
             </p>
           ))}

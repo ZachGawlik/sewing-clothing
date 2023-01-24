@@ -11,8 +11,8 @@ const ToolsPage: NextPage = () => {
       </Head>
       <main className="min-h-screen space-y-8 py-4 px-4">
         <h1 className="font-mono">
-          <Link href="/">
-            <a className="text-blue-400">sewing.clothing</a>
+          <Link href="/" className="text-blue-400">
+            sewing.clothing
           </Link>
           /tools
         </h1>
@@ -21,10 +21,8 @@ const ToolsPage: NextPage = () => {
             <p>This will have all the future tools</p>
             <ul className="space-y-2 list-disc list-inside">
               <li>
-                <Link href="/tools/length">
-                  <a className="text-blue-400">
-                    Length conversion. cm {'<->'} inch
-                  </a>
+                <Link href="/tools/length" className="text-blue-400">
+                  Length conversion. cm{'<->'}inch
                 </Link>
               </li>
               <li>GSM / Oz converter and reference</li>

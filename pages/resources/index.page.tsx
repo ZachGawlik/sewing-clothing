@@ -1,5 +1,6 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
+import Image from 'next/image';
 import imgSerger from '../../public/serger.jpg';
 import imgNeedleSchmetz from '../../public/needle-id-schmetz.png';
 import imgNeedleSinger from '../../public/needle-id-singer.png';
@@ -26,7 +27,7 @@ const ResourcesPage: NextPage = () => {
               <details>
                 <summary>Serger Tension</summary>
                 <div>
-                  <img
+                  <Image
                     src={imgSerger}
                     alt="Chart for identifying serger tension issues. Too high of tension pulls other threads out of position, while too low causes extra loops"
                   />
@@ -43,7 +44,7 @@ const ResourcesPage: NextPage = () => {
             <li>
               <details>
                 <summary>Needle Identification - Schmetz</summary>
-                <img
+                <Image
                   src={imgNeedleSchmetz}
                   alt="Schmetz needles have a bespoke two-band color-coded system based off needle type and size. These color codes do not apply to other needle brands."
                 />
@@ -52,7 +53,7 @@ const ResourcesPage: NextPage = () => {
             <li>
               <details>
                 <summary>Needle Identification - Singer</summary>
-                <img
+                <Image
                   src={imgNeedleSinger}
                   alt="Like Schemtz, Singer needles have a bespoke two-band color-coded system based off needle type and size. These color codes do not apply to other needle brands."
                 />
