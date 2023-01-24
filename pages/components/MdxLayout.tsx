@@ -37,7 +37,7 @@ const MdxLayout = ({
           `}
         >
           <Link href="/" className="text-blue-400 font-mono">
-            sewing.clothing
+            sew.clothing
           </Link>
         </footer>
         // TODO: iphone safe spadding

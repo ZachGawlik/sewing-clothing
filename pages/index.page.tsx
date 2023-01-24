@@ -29,7 +29,7 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         <div className="prose prose-invert prose-a:text-sky-200 prose-a:no-underline">
           <img src="/under-construction-1.png" alt="" />
-          <h1 className="font-mono text-4xl text-center">sewing.clothing</h1>
+          <h1 className="font-mono text-4xl text-center">sew.clothing</h1>
           {[
             {
               emoji: '📄',
@@ -45,10 +45,11 @@ const Home: NextPage = () => {
           ].map(({ emoji, text, href }) => (
             <p key={text}>
               {emoji}
-              <Link href={href} className="pl-2 hover:underline hover:text-sky-300">
-
+              <Link
+                href={href}
+                className="pl-2 hover:underline hover:text-sky-300"
+              >
                 {text}
-
               </Link>
             </p>
           ))}

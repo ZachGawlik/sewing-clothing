@@ -12,7 +12,7 @@ const ToolsPage: NextPage = () => {
       <main className="min-h-screen space-y-8 py-4 px-4">
         <h1 className="font-mono">
           <Link href="/" className="text-blue-400">
-            sewing.clothing
+            sew.clothing
           </Link>
           /tools
         </h1>

@@ -6,7 +6,7 @@ const FourOhFourPage = () => {
   return (
     <div className={`${styles.container}`}>
       <Head>
-        <title>404 | sewing.clothing</title>
+        <title>404 | sew.clothing</title>
       </Head>
       <PageHeader className="max-w-prose lg:max-w-none" />
       <main className={`${styles.main} prose prose-invert`}>

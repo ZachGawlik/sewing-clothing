@@ -10,7 +10,7 @@ const PageHeader = ({
 }) => (
   <header className={`pt-2 w-full ${className}`}>
     <Link href="/" className="text-blue-400 font-mono">
-      sewing.clothing
+      sew.clothing
     </Link>
     {children}
   </header>
