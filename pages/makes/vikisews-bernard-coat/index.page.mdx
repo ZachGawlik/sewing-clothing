@@ -1,0 +1,103 @@
+import Image from 'next/image';
+import MdxLayout from '../../components/MdxLayout';
+import imgFrontOpen from './vikisews-bernard-front-open.jpeg';
+import imgFrontClosed from './vikisews-bernard-front-closed.jpeg';
+import imgDetails from './vikisews-bernard-details.jpeg';
+import imgFlat from './vikisews-bernard-flat.jpeg';
+import imgSide from './vikisews-bernard-side.jpeg';
+import imgBack from './vikisews-bernard-back.jpeg';
+
+export const meta = {
+  title: 'My makes - VikiSews Bernard Coat',
+  description:
+    'After sewing my own clothes for a year, here are the things that surprised me even after extensively researching this hobby.',
+};
+
+I made the [Bernard Coat by VikiSews](https://vikisews.com/vykrojki/men-patterns/bernard-coat/),
+a "men’s semi-fitted double-breasted coat with a straight silhouette".
+The pattern is drafted for European sizes 38-54, or chest widths of 34 5/8" - 47 1/4" (88-120cm).
+
+<Image
+  src={imgFrontOpen}
+  priority={true}
+  alt="Me standing facing the camera straight-on wearing a structure blue-green wool coat with strong shoulders and a notched lapel. The float arches out from the waist down to the hem reaching my knees due to wearing it unbuttoned."
+/>
+<Image src={imgSide} alt="Side 3/4 view of me wearing the coat" />
+<Image
+  src={imgDetails}
+  alt="Zoomed in photo of a flat lay of the coat, showing the front button, the matching sleeve buttons, the small horizontal chest welt pocket and the tip of the slanted front welt pocket"
+/>
+<Image src={imgBack} alt="Back view of me wearing the coat" />
+<Image
+  src={imgFrontClosed}
+  alt="Front view with buttons closed, one arm in pocket"
+/>
+<Image
+  src={imgFlat}
+  alt="Flat lay of the top half of the coat showing to show the seamlines around the collar, notched lapel and the shiny black lining"
+/>
+
+I made the size 38 in the shortest height (170-176cm, 5'7"-5'9"). My alterations:
+
+- Made it knee length. I moved the vent up 1 1/2", and then chopped off 5" from the hem.
+- Moved the front angled pockets up 1 1/4". Should've done 2 1/2". My hands barely reach them.
+- Removed shaping on the side's back seam to make it straighter from the waist down to the hem. The pattern piece's arching looked strange on me for my tastes.
+- Raised the sleeve up 1 3/4"
+- Moved shoulder in by 1 1/4"
+- Reduced 1" height from the lining, which still kept plenty of ease (more on this below)
+
+## Pattern thoughts: Everything besides the fit
+
+The PDF you're sent only includes the size you ordered.
+You better hope you fit the pattern's expected body ratios because you cannot grade between sizes.
+
+There are a couple definite errors in the PDFs.
+The sleeve buttons are spaced 1" apart despite the pattern's own photographs showing the 1/2" buttons butted next to each other.
+More worryingly, I _think_ the lining PDF I received was not actually matched to the height of my main fabric PDF.
+The lining body pieces are 1" taller than the main fabric pieces.
+The main fabric also gets shortened by 7/8" relative to the lining because of the hem!
+When I constructed as-is, the lining drooped below the hem.
+I cut off 1" from the lining to keep 7/8" for ease.
+
+For digital pattern alterers or projector sewists, the PDF isn't in coherent paths or segmented into layers so it takes time to get it in a workable state.
+Also, the pocket lining pattern pieces are included in the main fabric PDF rather than the lining PDF.
+Perhaps the arrangement was optimized to save paper for those who print.
+
+## Construction process
+
+The instructions initially seemed okay, but they grow insufficient as the pattern progresses.
+There were verbose descriptions for the easiest steps but very little said about the trickiest steps.
+Each step had an accompanying photo, but often the photo was taken at the wrong stage of the step to be helpful.
+For multiple steps on the vent construction and lining attachment I found the instructions to be unhelpful.
+I had to work out a few parts myself, and I sewed a couple samples to double-check that my intuition was right.
+
+Most frustratingly, on the last real step, there is zero mention about how to attach the lining to the hem and the back vents.
+Truly not one word or picture.
+
+While I'm generally resourceful at learning things myself by compiling several online/book sources, I really struggled to find any that neatly matched the particulars of this coat's design and prior construction order.
+
+## In Conclusion
+
+Any coat like this will be a difficult project no matter what.
+Plenty of parts were difficult due to my general "intermediate" skill level and my picking an ambitious project.
+
+If you've never made a similar lined garment with a back vent before, I cannot recommend this pattern.
+The poor descriptions and unhelpfulness of the photos on the key steps was deeply frustrating.
+Even in the best case scenario, this project will take several days.
+The stakes start to feel really high near the end because you've invested so much time into the project,
+but when you most need them, the instructions leave you to fend for yourself.
+
+If you have already constructed a similar coat, then go right ahead with this pattern.
+Follow your own construction order.
+Definitely make a muslin, as the front pocket height seems questionable considering the adjustment I had to make.
+Before finishing the hem, double-check the lining length to see if you'll also need to reduce it to avoid it drooping below the finished hem.
+
+Ultimately, there are so few coat patterns and "menswear" patterns in general, so I am thankful for it existing.
+I ended up with a coat in the style and fit I was aiming for with better quality than something I could pick up at a store.
+But I eagerly await the day someone else releases a lined coat with back vent pattern so that I can learn how to really do the parts I fudged.
+
+export default ({ children }) => (
+  <MdxLayout showFooter={true} meta={meta}>
+    {children}
+  </MdxLayout>
+);
