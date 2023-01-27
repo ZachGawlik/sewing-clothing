@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+const rehypeSlug = require('rehype-slug');
+
 const withMDX = require('@next/mdx')({
   extension: /\.mdx?$/,
   options: {
     remarkPlugins: [],
-    rehypePlugins: [],
+    rehypePlugins: [rehypeSlug],
+    providerImportSource: '@mdx-js/react',
   },
 });
 
