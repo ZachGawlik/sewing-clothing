@@ -1,0 +1,63 @@
+import Image from 'next/image';
+import MdxLayout from '../../components/MdxLayout';
+import {
+  VinylMuslinGallery,
+  VinylFinalGallery,
+  VinylSnapsGallery,
+} from './VinylGalleries';
+
+export const meta = {
+  title: 'My makes - Self-drafted Y2K Vinyl Jacket',
+  description:
+    'Recapping and showing off my first experience with this alien fabric',
+};
+
+I self-drafted a chore jacket and made it out of translucent blue vinyl for a Y2K-themed party.
+
+<VinylFinalGallery />
+
+I confused myself when constructing the front top pockets, but every other seam is french seamed to reduce scratchiness.
+
+## Process
+
+I drafted the pattern by using a couple proper button-up patterns as a guide and:
+
+- added a cut line to make a front yoke
+- added a back vent
+- enlarged the armhole and redrafted the sleeve curve to match seamline lengths, since vinyl has no ease
+- made standard length & hemline adjustments
+
+I made a muslin in thick canvas since I didn't trust my drafting.
+I originally only drafted it to have bottom pockets, but on try-on it looked off balance.
+I added masking tape in the shape of top pockets to see if it improved the look.
+It did!
+In fact it was the only change I made between my muslin and my final jacket.
+I was really happy that my drafting had the exact fit I intended.
+
+<VinylMuslinGallery />
+
+I typed out all my instructions before starting, which was a really helpful exercise.
+Both for mentally preparing myself and for expanding my ability to mentally visualize a garment.
+
+Snaps had to be professionally installed.
+Trying to do it myself with a hammer wouldn't cut it.
+
+<VinylSnapsGallery />
+
+In hindsight I would've made the sleeves a bit wider to get a tiny bit of air-flow through the plastic.
+That would've also made attaching them a bit easier.
+It could be interesting doing an Olya Shirt style thing with vinyl, as it would end up with the same look but avoid the tricky sleeve attachment.
+
+Overall, I'm very happy with it.
+Working with vinyl and having it fight with my home machine was An Experience™.
+It was infuriating, but in the way where it made me occasionally maniacally laugh because it was so silly to try to force this thing that is not fabric to act like fabric.
+
+p.s.
+I broke out a separate post on the basics I learned of [sewing with vinyl](/sewing-with-vinyl)
+to spare those needing tips from this personal writing.
+
+export default ({ children }) => (
+  <MdxLayout showFooter={true} meta={meta}>
+    {children}
+  </MdxLayout>
+);

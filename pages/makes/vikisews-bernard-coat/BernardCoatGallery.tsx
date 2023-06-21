@@ -1,24 +1,16 @@
-import Link from 'next/link';
-import Image from 'next/image';
 import * as React from 'react';
 import imgBack from '../../../public/makes/vikisews-bernard-back.jpeg';
 import imgDetails from '../../../public/makes/vikisews-bernard-details.jpeg';
 import imgFlat from '../../../public/makes/vikisews-bernard-flat.jpeg';
 import imgFrontClosed from '../../../public/makes/vikisews-bernard-front-closed.jpeg';
 import imgFrontOpen from '../../../public/makes/vikisews-bernard-front-open.jpeg';
-import imgSide from '../../../public/makes/vikisews-bernard-side.jpeg';
-import { usePhotoswipeGallery } from './usePhotoswipeGallery';
-import cx from 'classnames';
+import bernardImageside from '../../../public/makes/vikisews-bernard-side.jpeg';
+import {
+  GalleryItem,
+  GalleryImages,
+} from '../../components/usePhotoswipeGallery';
 
-type GalleryItem = {
-  href: string;
-  src: typeof imgFrontOpen;
-  alt: string;
-  linkProps?: { className?: string };
-  imgProps?: { priority?: boolean };
-};
-
-const imgs: GalleryItem[] = [
+const bernardImages: GalleryItem[] = [
   {
     href: '/makes/vikisews-bernard-front-open.jpeg',
     src: imgFrontOpen,
@@ -28,7 +20,7 @@ const imgs: GalleryItem[] = [
   },
   {
     href: '/makes/vikisews-bernard-side.jpeg',
-    src: imgSide,
+    src: bernardImageside,
     alt: 'Side 3/4 view of me wearing the coat',
   },
   {
@@ -54,32 +46,13 @@ const imgs: GalleryItem[] = [
 ];
 
 const BernardCoatGallery = () => {
-  usePhotoswipeGallery('bernard-gallery');
-
   return (
-    <div id="bernard-gallery" className="not-prose max-w-[550px] m-auto">
-      <div className="grid grid-cols-3 grid-rows-3 gap-2">
-        {imgs.map(({ href, src, alt, linkProps, imgProps }) => (
-          <Link
-            key={href}
-            className={cx('block', linkProps?.className)}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            data-cropped="true"
-            data-pswp-width={src.width}
-            data-pswp-height={src.height}
-          >
-            <Image
-              {...imgProps}
-              src={src}
-              alt={alt}
-              className="block h-full w-full rounded-lg object-cover object-center"
-            />
-          </Link>
-        ))}
-      </div>
-    </div>
+    <GalleryImages
+      className="not-prose max-w-[550px] m-auto grid grid-cols-3 grid-rows-3 gap-2"
+      id="bernard-gallery"
+      items={bernardImages}
+      title="Completed VikiSews Bernard Coat photos"
+    />
   );
 };
 

@@ -39,3 +39,27 @@ a {
 details summary {
   cursor: pointer;
 }
+
+.pswp__custom-caption:empty {
+  padding: 0;
+}
+.pswp__custom-caption {
+  width: calc(100% - 32px);
+  max-width: 450px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+}
+.pswp__custom-caption a {
+  color: #fff;
+  text-decoration: underline;
+}
+.pswp__gallery-title {
+  text-shadow: 1px 1px 3px var(--pswp-icon-color-secondary);
+}
+.hidden-caption-content {
+  display: none;
+}
