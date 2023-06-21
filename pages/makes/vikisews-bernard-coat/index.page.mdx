@@ -1,11 +1,7 @@
+import Link from 'next/link';
 import Image from 'next/image';
 import MdxLayout from '../../components/MdxLayout';
-import imgFrontOpen from './vikisews-bernard-front-open.jpeg';
-import imgFrontClosed from './vikisews-bernard-front-closed.jpeg';
-import imgDetails from './vikisews-bernard-details.jpeg';
-import imgFlat from './vikisews-bernard-flat.jpeg';
-import imgSide from './vikisews-bernard-side.jpeg';
-import imgBack from './vikisews-bernard-back.jpeg';
+import BernardCoatGallery from './BernardCoatGallery';
 
 export const meta = {
   title: 'My makes - VikiSews Bernard Coat',
@@ -17,25 +13,7 @@ I made the [Bernard Coat by VikiSews](https://vikisews.com/vykrojki/men-patterns
 a "men’s semi-fitted double-breasted coat with a straight silhouette".
 The pattern is drafted for European sizes 38-54, or chest widths of 34 5/8" - 47 1/4" (88-120cm).
 
-<Image
-  src={imgFrontOpen}
-  priority={true}
-  alt="Me standing facing the camera straight-on wearing a structure blue-green wool coat with strong shoulders and a notched lapel. The float arches out from the waist down to the hem reaching my knees due to wearing it unbuttoned."
-/>
-<Image src={imgSide} alt="Side 3/4 view of me wearing the coat" />
-<Image
-  src={imgDetails}
-  alt="Zoomed in photo of a flat lay of the coat, showing the front button, the matching sleeve buttons, the small horizontal chest welt pocket and the tip of the slanted front welt pocket"
-/>
-<Image src={imgBack} alt="Back view of me wearing the coat" />
-<Image
-  src={imgFrontClosed}
-  alt="Front view with buttons closed, one arm in pocket"
-/>
-<Image
-  src={imgFlat}
-  alt="Flat lay of the top half of the coat showing to show the seamlines around the collar, notched lapel and the shiny black lining"
-/>
+<BernardCoatGallery />
 
 I made the size 38 in the shortest height (170-176cm, 5'7"-5'9"). My alterations:
 
