@@ -26,7 +26,7 @@ const Home: NextPage = () => {
           }
         `}
       />
-      <main className={styles.main}>
+      <main>
         <div className="prose prose-invert prose-a:text-sky-200 prose-a:no-underline">
           <img src="/under-construction-1.png" alt="" />
           <h1 className="font-mono text-4xl text-center">sew.clothing</h1>

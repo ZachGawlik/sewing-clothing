@@ -9,16 +9,14 @@ import styles from '../../styles/Home.module.css';
 
 const ResourcesPage: NextPage = () => {
   return (
-    <div className={`${styles.container}`}>
+    <div className={styles.container}>
       <Head>
         <title>Resources - Sewing Clothing</title>
         <meta name="description" content="Sewing resources" />
       </Head>
 
       <PageHeader />
-      <main
-        className={`${styles.main} prose prose-invert prose-a:text-sky-200 w-full`}
-      >
+      <main className="prose prose-invert prose-a:text-sky-200 w-full">
         <h1 className="text-center">Resources</h1>
         <div>
           <p>Quick infographic resources</p>

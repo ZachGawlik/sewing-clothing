@@ -63,7 +63,7 @@ export type MdxLayoutProps = {
 
 const MdxLayout = ({ children, showFooter, meta }: MdxLayoutProps) => {
   return (
-    <div className={`${styles.container}`}>
+    <div className={styles.container}>
       <Head>
         <title>{meta.title}</title>
         <meta name="description" content={meta.description} />
@@ -71,14 +71,14 @@ const MdxLayout = ({ children, showFooter, meta }: MdxLayoutProps) => {
       <PageHeader className="max-w-prose lg:max-w-none" />
 
       <MDXProvider components={components}>
-        <main className={`${styles.main} prose prose-invert`}>
+        <main className="prose prose-invert">
           <h1>{meta.title}</h1>
           {children}
         </main>
       </MDXProvider>
       {showFooter && (
         <footer
-          className="w-full max-w-prose lg:max-w-none"
+          className="w-full max-w-prose lg:max-w-none pt-2"
           css={css`
             padding-bottom: calc(env(safe-area-inset-bottom, 0) + 0.5em);
           `}
