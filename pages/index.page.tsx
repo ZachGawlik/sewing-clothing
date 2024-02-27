@@ -5,6 +5,25 @@ import { Global, css } from '@emotion/react';
 
 import styles from '../styles/Home.module.css';
 
+const HomePageLink = ({
+  emoji,
+  text,
+  href,
+}: {
+  emoji: string;
+  text: string;
+  href: string;
+}) => {
+  return (
+    <p key={text}>
+      {emoji}
+      <Link href={href} className="pl-2 hover:underline hover:text-sky-300">
+        {text}
+      </Link>
+    </p>
+  );
+};
+
 /* eslint-disable @next/next/no-img-element */
 const Home: NextPage = () => {
   return (
@@ -26,34 +45,54 @@ const Home: NextPage = () => {
           }
         `}
       />
-      <main>
-        <div className="prose prose-invert prose-a:text-sky-200 prose-a:no-underline">
-          <img src="/under-construction-1.png" alt="" />
-          <h1 className="font-mono text-4xl text-center">sew.clothing</h1>
-          {[
-            {
-              emoji: '📄',
-              text: 'Getting started with sewing clothing',
-              href: '/start',
-            },
-            {
-              emoji: '📐',
-              text: 'Length converter. inch ↔ cm',
-              href: '/tools/length',
-            },
-            { emoji: '🔎', text: 'Resources', href: '/resources' },
-          ].map(({ emoji, text, href }) => (
-            <p key={text}>
-              {emoji}
-              <Link
-                href={href}
-                className="pl-2 hover:underline hover:text-sky-300"
-              >
-                {text}
-              </Link>
-            </p>
-          ))}
-          <img src="/under-construction-1.png" alt="" />
+      <main className="prose prose-invert prose-a:text-sky-100 prose-a:no-underline md:px-4 lg:px-8">
+        <h1 className="font-mono text-4xl text-center">sew.clothing</h1>
+        <div>
+          <div>
+            <img src="/under-construction-1.png" alt="" />
+            {[
+              {
+                emoji: '📄',
+                text: 'Getting started with sewing clothing',
+                href: '/start',
+              },
+              {
+                emoji: '📄',
+                text: 'Sewing with Vinyl',
+                href: '/sewing-with-vinyl',
+              },
+              {
+                emoji: '📄',
+                text: 'NYC Garment District Stores',
+                href: '/nyc-stores',
+              },
+              {
+                emoji: '📐',
+                text: 'Length converter. inch ↔ cm',
+                href: '/tools/length',
+              },
+            ].map((props) => (
+              <HomePageLink key={props.href} {...props} />
+            ))}
+          </div>
+          <div>
+            <h2>My Own Sewing:</h2>
+            {[
+              {
+                emoji: '📄',
+                text: 'VikiSews Bernard Coat',
+                href: '/makes/vikisews-bernard-coat',
+              },
+              {
+                emoji: '📄',
+                text: 'Y2K Blue Vinyl Jacket',
+                href: '/makes/y2k-vinyl-jacket',
+              },
+            ].map((props) => (
+              <HomePageLink key={props.href} {...props} />
+            ))}
+            <img src="/under-construction-1.png" alt="" />
+          </div>
         </div>
       </main>
     </div>
