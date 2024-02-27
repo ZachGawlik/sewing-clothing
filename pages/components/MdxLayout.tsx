@@ -6,20 +6,16 @@ import styles from '../../styles/Home.module.css';
 import PageHeader from './PageHeader';
 import { MDXProvider } from '@mdx-js/react';
 
-type HProps = { id?: string };
-
-const Heading = ({
-  as,
-  id,
-  ...rest
-}: {
-  as: React.ElementType;
+type HProps = {
   id?: string;
-}) => {
+  children?: React.ReactNode;
+  as: React.ElementType;
+};
+
+const Heading = ({ as, id, children, ...rest }: HProps) => {
   const HeadingComponent = as;
   return (
     <div
-      className="relative"
       css={css`
         & a {
           opacity: 0;
@@ -30,14 +26,9 @@ const Heading = ({
         }
       `}
     >
-      <Link href={`#${id}`}>
-        <div
-          className="absolute not-prose"
-          css={css`
-            transform: translateX(-20px);
-            top: calc(50% - 6px);
-          `}
-        >
+      <HeadingComponent id={id} {...rest}>
+        {children}&nbsp;
+        <Link href={`#${id}`}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="12"
@@ -48,22 +39,21 @@ const Heading = ({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="feather feather-link"
+            className="feather feather-link inline-block ml-2"
           >
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
           </svg>
-        </div>
-      </Link>
-      <HeadingComponent id={id} {...rest} />
+        </Link>
+      </HeadingComponent>
     </div>
   );
 };
 
 const components = {
-  h2: (props: HProps) => <Heading as="h2" {...props} />,
-  h3: (props: HProps) => <Heading as="h3" {...props} />,
-  h4: (props: HProps) => <Heading as="h4" {...props} />,
+  h2: (props: Omit<HProps, 'as'>) => <Heading as="h2" {...props} />,
+  h3: (props: Omit<HProps, 'as'>) => <Heading as="h3" {...props} />,
+  h4: (props: Omit<HProps, 'as'>) => <Heading as="h4" {...props} />,
 };
 
 export type MdxLayoutProps = {
@@ -92,7 +82,7 @@ const MdxLayout = ({ children, showFooter, meta }: MdxLayoutProps) => {
       </MDXProvider>
       {showFooter && (
         <footer
-          className="w-full max-w-prose lg:max-w-none pt-2"
+          className="w-full max-w-prose lg:max-w-none border-t-2 border-blue-400 pt-0 mt-4"
           css={css`
             padding-bottom: calc(env(safe-area-inset-bottom, 0) + 0.5em);
           `}
