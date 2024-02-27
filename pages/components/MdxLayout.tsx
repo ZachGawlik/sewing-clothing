@@ -18,11 +18,25 @@ const Heading = ({
 }) => {
   const HeadingComponent = as;
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      css={css`
+        & a {
+          opacity: 0;
+          transition: 0.3s ease-in;
+        }
+        &:hover a {
+          opacity: 1;
+        }
+      `}
+    >
       <Link href={`#${id}`}>
         <div
           className="absolute not-prose"
-          css={{ transform: 'translateX(-20px)', top: 'calc(50% - 6px)' }}
+          css={css`
+            transform: translateX(-20px);
+            top: calc(50% - 6px);
+          `}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
