@@ -11,6 +11,9 @@
     "test": "jest",
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,md}'"
   },
+  "engines": {
+    "node": "18.x || 20.x"
+  },
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
